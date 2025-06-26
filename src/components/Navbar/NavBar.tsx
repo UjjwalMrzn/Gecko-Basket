@@ -6,7 +6,7 @@ import {
   ShoppingCart,
   User,
 } from "lucide-react";
-import { Link, NavLink } from "react-router";
+import { Link, NavLink } from "react-router-dom";
 import Logo from "../../assets/GeckoBasketLogo.png";
 
 const Navbar = () => {
