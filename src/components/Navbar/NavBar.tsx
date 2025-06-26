@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { Check, Heart, Menu, Search, ShoppingCart, User } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import Logo from "../../assets/GeckoBasketLogo.png";
 
 const Navbar = () => {
+  // State to track if dropdown is open
+  const [isUserMenuOpen, setUserMenuOpen] = useState(false);
+  const [isCategoriesOpen, setCategoriesOpen] = useState(false);
+
   return (
     <header className="w-full font-inter">
       {/* Top bar */}
@@ -70,10 +75,15 @@ const Navbar = () => {
             </Link>
 
             {/* User Menu */}
-            <div className="relative group">
+            <div
+              className="relative inline-block"
+              onMouseEnter={() => setUserMenuOpen(true)}
+              onMouseLeave={() => setUserMenuOpen(false)}
+            >
               <button
+                type="button"
                 aria-haspopup="true"
-                aria-expanded="false"
+                aria-expanded={isUserMenuOpen}
                 aria-label="User account menu"
                 className="text-[#272343] hover:text-[#59b143] focus:outline-none"
               >
@@ -81,10 +91,9 @@ const Navbar = () => {
               </button>
 
               <ul
-                className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20
-                 opacity-0 group-hover:opacity-100 
-                 pointer-events-none group-hover:pointer-events-auto 
-                 transition duration-200 ease-in-out"
+                className={`absolute right-0 top-full mt-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20 transition-opacity duration-200 ${
+                  isUserMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                }`}
               >
                 <li>
                   <Link
@@ -113,16 +122,22 @@ const Navbar = () => {
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
             {/* Categories dropdown */}
-            <div className="relative group">
-              <button className="flex items-center gap-2 text-sm font-medium text-gray-700 capitalize hover:text-[#59b143]">
+            <div
+              className="relative inline-block"
+              onMouseEnter={() => setCategoriesOpen(true)}
+              onMouseLeave={() => setCategoriesOpen(false)}
+            >
+              <button
+                type="button"
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 capitalize hover:text-[#59b143]"
+              >
                 <Menu size={18} /> All Categories
               </button>
 
               <ul
-                className="absolute left-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20 
-                opacity-0 group-hover:opacity-100 
-                pointer-events-none group-hover:pointer-events-auto 
-                transition duration-200 ease-in-out"
+                className={`absolute left-0 top-full mt-0 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20 transition-opacity duration-200 ${
+                  isCategoriesOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                }`}
               >
                 <li>
                   <a
