@@ -1,17 +1,34 @@
-// // import React from 'react';
-// // import Navbar from './components/Navbar';
-// import Footer from './components/Footer';
+import { Route, Routes } from "react-router-dom";
+import Navbar from "./components/Navbar/NavBar";
+import Footer from "./components/Footer/Footer";
+import Home from "./pages/Home/Home";
+import Auth from "./pages/Auth/Auth";
+import Login from "./pages/Auth/Login/Login";
+import Register from "./pages/Auth/Register/Register";
+import Error from "./pages/Error/Error";
+import AuthCheck from "./AuthCheck/AuthCheck";
 
-// function App() {
-//   return (
-//     <>
-//       {/* <Navbar /> */}
-//       <main className="container mx-auto p-4">
-//         <h1 className="text-3xl font-bold text-center my-8">Coming Soon 🛒</h1>
-//       </main>
-//       <Footer />
-//     </>
-//   );
-// }
+const App = () => {
+  return (
+    <>
+      <Navbar />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <AuthCheck>
+                <Home />
+              </AuthCheck>
+            }
+          />
+          <Route path="auth" element={<Auth />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="*" element={<Error />} />
+        </Routes>
+      <Footer />
+    </>
+  );
+};
 
-// export default App;
+export default App;
