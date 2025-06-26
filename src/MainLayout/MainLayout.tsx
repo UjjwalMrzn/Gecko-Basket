@@ -7,26 +7,30 @@ import Login from "../pages/Auth/Login/Login";
 import Register from "../pages/Auth/Register/Register";
 import Error from "../pages/Error/Error";
 import AuthCheck from "../AuthCheck/AuthCheck";
+import StickyWhatsApp from "../components/StickyWhatsApp/StickyWhatsApp";
 
 const MainLayout = () => {
   return (
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={
-          <AuthCheck>
-            <Home />
-          </AuthCheck>
-        } />
+        <Route
+          path="/"
+          element={
+            <AuthCheck>
+              <Home />
+            </AuthCheck>
+          }
+        />
         <Route path="auth" element={<Auth />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="*" element={<Error />} />
       </Routes>
       <Footer />
+      <StickyWhatsApp />
     </>
   );
 };
-
 
 export default MainLayout;
