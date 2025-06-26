@@ -85,7 +85,7 @@ export default function Footer() {
           <p className="flex items-center space-x-3">
             <Icon icon={phoneIcon} className="text-green-600" width={18} />
             <a href="tel:+9779765009755" className="hover:text-green-600 transition" aria-label="Call Gecko Basket">
-              +977 9765009755
+              +977 9840209417
             </a>
           </p>
           <p className="flex items-center space-x-3">
