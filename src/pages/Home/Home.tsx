@@ -11,44 +11,15 @@ const Home = () => {
   return (
     <div>
       {/* Banner Section */}
-      <section className="w-full bg-[#f0f2f3] flex items-center justify-center rounded-b-3xl">
+      <section className="w-full bg-[#f0f2f3] flex justify-center rounded-b-3xl">
         <Banner />
       </section>
 
       {/* Delivery Section */}
-      <section className="w-full min-h-[150px]">
-        <Delivery />
-      </section>
+      <Delivery />
 
-      {/* Brand Section */}
-      <section className="flex items-center justify-center h-[171px] w-full my-8">
-        <Brand />
-      </section>
+      <Product />
 
-      {/* Features Section */}
-      <section className="w-full flex items-center justify-center mb-[80px]">
-        <Features />
-      </section>
-
-      {/* Categories Section */}
-      <section className="w-full flex items-center justify-center mb-[80px]">
-        <Categories />
-      </section>
-
-      {/* Product Section */}
-      <section className="w-full flex items-center justify-center pb-[80px]">
-        <Product />
-      </section>
-
-      {/* Client Testimonials Section */}
-      <section className="w-full flex items-center justify-center bg-[#f0f2f3] min-h-[589px] py-[80px]">
-        <Client />
-      </section>
-
-      {/* Recent Items Section */}
-      <section className="w-full flex items-center justify-center py-[80px]">
-        <Recent />
-      </section>
     </div>
   );
 };
