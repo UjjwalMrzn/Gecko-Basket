@@ -1,11 +1,4 @@
-import {
-  Check,
-  Heart,
-  Menu,
-  Search,
-  ShoppingCart,
-  User,
-} from "lucide-react";
+import { Check, Heart, Menu, Search, ShoppingCart, User } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import Logo from "../../assets/GeckoBasketLogo.png";
 
@@ -53,7 +46,11 @@ const Navbar = () => {
           {/* User actions */}
           <div className="flex justify-end items-center gap-6">
             {/* Cart */}
-            <Link to="/cart" className="relative text-[#272343] hover:text-[#59b143]" aria-label="View cart">
+            <Link
+              to="/cart"
+              className="relative text-[#272343] hover:text-[#59b143]"
+              aria-label="View cart"
+            >
               <ShoppingCart size={24} />
               <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-[#59b143] rounded-full">
                 2
@@ -61,7 +58,11 @@ const Navbar = () => {
             </Link>
 
             {/* Wishlist */}
-            <Link to="/wishlist" className="relative text-[#272343] hover:text-[#59b143]" aria-label="View wishlist">
+            <Link
+              to="/wishlist"
+              className="relative text-[#272343] hover:text-[#59b143]"
+              aria-label="View wishlist"
+            >
               <Heart size={24} />
               <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-[#59b143] rounded-full">
                 5
@@ -78,7 +79,13 @@ const Navbar = () => {
               >
                 <User size={24} />
               </button>
-              <ul className="invisible group-focus:visible group-hover:visible absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20">
+
+              <ul
+                className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20
+                 opacity-0 group-hover:opacity-100 
+                 pointer-events-none group-hover:pointer-events-auto 
+                 transition duration-200 ease-in-out"
+              >
                 <li>
                   <Link
                     to="/account"
@@ -107,21 +114,29 @@ const Navbar = () => {
           <div className="flex items-center gap-8">
             {/* Categories dropdown */}
             <div className="relative group">
-              <button
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 capitalize hover:text-[#59b143] focus:outline-none"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
+              <button className="flex items-center gap-2 text-sm font-medium text-gray-700 capitalize hover:text-[#59b143]">
                 <Menu size={18} /> All Categories
               </button>
-              <ul className="invisible group-focus:visible group-hover:visible absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20">
+
+              <ul
+                className="absolute left-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20 
+                opacity-0 group-hover:opacity-100 
+                pointer-events-none group-hover:pointer-events-auto 
+                transition duration-200 ease-in-out"
+              >
                 <li>
-                  <a href="#" className="block px-4 py-2 text-black hover:bg-[#59b143] hover:text-white transition cursor-pointer">
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-black hover:bg-[#59b143] hover:text-white"
+                  >
                     Food & Beverages
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="block px-4 py-2 text-black hover:bg-[#59b143] hover:text-white transition cursor-pointer">
+                  <a
+                    href="#"
+                    className="block px-4 py-2 text-black hover:bg-[#59b143] hover:text-white"
+                  >
                     Electronic Devices & Accessories
                   </a>
                 </li>
@@ -142,7 +157,9 @@ const Navbar = () => {
                   to={to}
                   className={({ isActive }) =>
                     `text-sm font-medium capitalize transition ${
-                      isActive ? "text-[#59b143]" : "text-gray-600 hover:text-[#59b143]"
+                      isActive
+                        ? "text-[#59b143]"
+                        : "text-gray-600 hover:text-[#59b143]"
                     }`
                   }
                 >
