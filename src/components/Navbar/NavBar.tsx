@@ -92,7 +92,9 @@ const Navbar = () => {
 
               <ul
                 className={`absolute right-0 top-full mt-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20 transition-opacity duration-200 ${
-                  isUserMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                  isUserMenuOpen
+                    ? "opacity-100 pointer-events-auto"
+                    : "opacity-0 pointer-events-none"
                 }`}
               >
                 <li>
@@ -136,7 +138,9 @@ const Navbar = () => {
 
               <ul
                 className={`absolute left-0 top-full mt-0 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20 transition-opacity duration-200 ${
-                  isCategoriesOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                  isCategoriesOpen
+                    ? "opacity-100 pointer-events-auto"
+                    : "opacity-0 pointer-events-none"
                 }`}
               >
                 <li>
