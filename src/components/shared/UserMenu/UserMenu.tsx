@@ -1,16 +1,23 @@
-import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import { User } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { User, ChevronDown } from "lucide-react";
 
-type UserMenuProps = {
-  isLoggedIn: boolean;
+import { useAuth } from "../../../context/AuthContext";
+import { useAuthModal } from "../../../context/AuthModalContext";
+
+import Button from "../../ui/Button";
+
+type Props = {
   onLogout: () => void;
 };
 
-const UserMenu = ({ isLoggedIn, onLogout }: UserMenuProps) => {
+const UserMenu = ({ onLogout }: Props) => {
+  const { isLoggedIn } = useAuth();
+  const { openModal } = useAuthModal();
   const [open, setOpen] = useState(false);
   const closeTimeout = useRef<NodeJS.Timeout | null>(null);
-
+  const navigate = useNavigate();
+  const location = useLocation(); 
   const handleMouseEnter = () => {
     if (closeTimeout.current) clearTimeout(closeTimeout.current);
     setOpen(true);
@@ -20,57 +27,63 @@ const UserMenu = ({ isLoggedIn, onLogout }: UserMenuProps) => {
     closeTimeout.current = setTimeout(() => setOpen(false), 150);
   };
 
+  const handleLogout = () => {
+    onLogout();
+    navigate("/");
+  };
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+if (!isLoggedIn) {
+  return (
+    <Button onClick={() => openModal("login")} className="text-sm px-3 py-2 rounded-md shadow-none">
+      Login
+    </Button>
+  );
+}
+
   return (
     <div
       className="relative"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* User Icon Button */}
       <button
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        className={`focus:outline-none transition-colors ${
-          open ? "text-[#59b143]" : "text-[#272343] hover:text-[#59b143]"
-        }`}
+        className="flex items-center gap-1 text-[#272343] hover:text-[#59b143] transition"
       >
-        <User size={24} className="transition-colors" />
+        <User size={22} />
+        <ChevronDown
+          size={18}
+          className={`transition-transform duration-200 ${open ? "rotate-180" : "rotate-0"}`}
+        />
       </button>
 
-      {/* Dropdown Menu */}
       {open && (
-        <ul className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 text-sm z-20">
-          {isLoggedIn ? (
-            <>
-              <li>
-                <Link
-                  to="/account"
-                  className="block px-4 py-2 hover:bg-[#59b143] hover:text-white"
-                >
-                  Account
-                </Link>
-              </li>
-              <li>
-                <button
-                  onClick={onLogout}
-                  className="block w-full text-left px-4 py-2 hover:bg-[#59b143] hover:text-white"
-                >
-                  Logout
-                </button>
-              </li>
-            </>
-          ) : (
+        <div className="absolute right-0 top-full mt-2 min-w-[160px] bg-white border border-gray-200 rounded-xl shadow-xl z-20 py-2 font-inter text-sm">
+          <ul className="py-1">
             <li>
               <Link
-                to="/login"
-                className="block px-4 py-2 hover:bg-[#59b143] hover:text-white"
+                to="/account"
+                className="block px-4 py-2 hover:bg-[#59b143] hover:text-white transition rounded-md"
               >
-                Login
+                Account
               </Link>
             </li>
-          )}
-        </ul>
+            <li>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-2 hover:bg-[#59b143] hover:text-white transition rounded-md"
+              >
+                Logout
+              </button>
+            </li>
+          </ul>
+        </div>
       )}
     </div>
   );

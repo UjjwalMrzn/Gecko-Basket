@@ -1,5 +1,5 @@
 import { ShoppingCart, Heart } from "lucide-react";
-import StarRating from "../../ui/StarRating/StarRating";
+import StarRating from "../../ui/StarRating";
 import useCart from "../../../hooks/usecart";
 import useWishlist from "../../../hooks/useWishlist";
 

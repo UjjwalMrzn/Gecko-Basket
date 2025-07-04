@@ -1,6 +1,7 @@
 import React from "react";
 import Slider, { Settings } from "react-slick";
 import { MoveRight, ChevronLeft, ChevronRight } from "lucide-react";
+
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -19,8 +20,7 @@ const Banner: React.FC = () => {
       id: 1,
       title: "Protein Sattu at just Rs.99/-",
       subTitle: "Limited time offer",
-     
-      image: "/src/components/Banner/Banner JPG/SAATU.png",
+      image: "/banners/sattu.png",
       bgColor: "bg-gradient-to-r from-amber-100 to-amber-50",
       buttonColor: "bg-amber-500 hover:bg-amber-600",
     },
@@ -28,7 +28,7 @@ const Banner: React.FC = () => {
       id: 2,
       title: "Best Furniture Collection for Your Interior",
       subTitle: "New Arrivals",
-       image: "/src/components/Banner/Banner JPG/gym-machine.png",
+      image: "/banners/furniture.png",
       bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50",
       buttonColor: "bg-indigo-500 hover:bg-indigo-600",
     },
@@ -36,7 +36,7 @@ const Banner: React.FC = () => {
       id: 3,
       title: "Premium Quality Gym Equipment",
       subTitle: "Summer Sale",
-      image: "/src/assets/Banner/banner_image.png",
+      image: "/banners/gym.png",
       bgColor: "bg-gradient-to-r from-green-50 to-teal-50",
       buttonColor: "bg-teal-500 hover:bg-teal-600",
     },
@@ -44,37 +44,31 @@ const Banner: React.FC = () => {
       id: 4,
       title: "Exclusive Deals on Home Essentials",
       subTitle: "Limited Stock",
-      image: "/src/assets/Banner/banner_image.png",
+      image: "/banners/home-essentials.png",
       bgColor: "bg-gradient-to-r from-purple-50 to-pink-50",
       buttonColor: "bg-purple-500 hover:bg-purple-600",
     },
   ];
 
-  const NextArrow: React.FC<{ onClick?: () => void }> = ({ onClick }) => {
-    return (
-      <button
-        onClick={onClick}
-        id="banner-next-arrow"
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-300"
-        aria-label="Next"
-      >
-        <ChevronRight className="w-6 h-6 text-gray-700" />
-      </button>
-    );
-  };
+  const NextArrow: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
+    <button
+      onClick={onClick}
+      className="group absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-[#59b143] transition"
+      aria-label="Next"
+    >
+      <ChevronRight className="w-6 h-6 text-gray-700 group-hover:text-white transition" />
+    </button>
+  );
 
-  const PrevArrow: React.FC<{ onClick?: () => void }> = ({ onClick }) => {
-    return (
-      <button
-        onClick={onClick}
-        id="banner-prev-arrow"
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-300"
-        aria-label="Previous"
-      >
-        <ChevronLeft className="w-6 h-6 text-gray-700" />
-      </button>
-    );
-  };
+  const PrevArrow: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
+    <button
+      onClick={onClick}
+      className="group absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-[#59b143]  transition"
+      aria-label="Previous"
+    >
+      <ChevronLeft className="w-6 h-6 text-gray-700 group-hover:text-white transition" />
+    </button>
+  );
 
   const settings: Settings = {
     dots: true,
@@ -83,8 +77,8 @@ const Banner: React.FC = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 2000,
-    cssEase: "cubic-bezier(0.645, 0.045, 0.355, 1)",
+    autoplaySpeed: 3500,
+    cssEase: "ease-in-out",
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     appendDots: (dots) => (
@@ -93,18 +87,19 @@ const Banner: React.FC = () => {
       </div>
     ),
     customPaging: () => (
-      <div className="w-2.5 h-2.5 rounded-full bg-white/70 hover:bg-white transition-all duration-300 cursor-pointer" />
+      <div className="w-2.5 h-2.5 rounded-full bg-white/70 hover:bg-white transition cursor-pointer" />
     ),
   };
 
   return (
-    <div className="w-full overflow-hidden relative">
+    <div className="w-full overflow-hidden relative font-inter">
       <Slider {...settings}>
         {products.map((product) => (
           <div key={product.id} className={`${product.bgColor} py-6 md:py-8 lg:py-10`}>
             <div className="container mx-auto px-4">
               <div className="flex flex-col md:flex-row items-center justify-between gap-6 lg:gap-10 xl:gap-16">
-                {/* Banner Text */}
+                
+                {/* Text Content */}
                 <div className="flex-1 order-2 md:order-1 text-center md:text-left px-4">
                   <p className="text-xs md:text-sm font-medium text-gray-600 uppercase mb-2 tracking-wider">
                     {product.subTitle}
@@ -113,16 +108,15 @@ const Banner: React.FC = () => {
                     {product.title}
                   </h3>
                   <button
-                    id="banner-button"
-                    className={`${product.buttonColor} w-36 md:w-40 h-11 md:h-12 rounded-lg text-white flex items-center justify-center gap-2 capitalize mx-auto md:mx-0 transition-all duration-300 hover:scale-[1.02] shadow-md`}
+                    className={`${product.buttonColor} w-36 md:w-40 h-11 md:h-12 rounded-lg text-white flex items-center justify-center gap-2 capitalize mx-auto md:mx-0 transition hover:scale-[1.03] shadow-md`}
                   >
                     <span className="font-medium text-sm md:text-base">Shop Now</span>
                     <MoveRight className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 </div>
 
-                {/* Banner Image - Made smaller */}
-                <div className="flex-1 order-1 md:order-2 flex justify-center items-center">
+                {/* Image */}
+                <div className="flex-1 order-1 md:order-2 flex justify-center items-center min-h-[200px]">
                   <img
                     src={product.image}
                     alt={product.title}
