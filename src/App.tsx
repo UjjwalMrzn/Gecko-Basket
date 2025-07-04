@@ -1,5 +1,7 @@
-// src/App.tsx
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
+
 import MainLayout from "./Layout/MainLayout/MainLayout";
 import AuthLayout from "./Layout/AuthLayout/AuthLayout";
 import Home from "./pages/Home/Home";
@@ -11,27 +13,33 @@ import AuthCheck from "./AuthCheck/AuthCheck";
 
 const App = () => {
   return (
-    <Routes>
-      {/*  Routes WITH MainLayout */}
-      <Route element={<MainLayout />}>
-        <Route
-          path="/"
-          element={
-            <AuthCheck>
-              <Home />
-            </AuthCheck>
-          }
-        />
-        <Route path="auth" element={<Auth />} />
-        <Route path="*" element={<Error />} />
-      </Route>
+    <BrowserRouter>
+      <CartProvider>
+        <WishlistProvider>
+          <Routes>
+            {/* Routes WITH MainLayout */}
+            <Route element={<MainLayout />}>
+              <Route
+                path="/"
+                element={
+                  <AuthCheck>
+                    <Home />
+                  </AuthCheck>
+                }
+              />
+              <Route path="auth" element={<Auth />} />
+              <Route path="*" element={<Error />} />
+            </Route>
 
-      {/*  Routes WITHOUT MainLayout */}
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Route>
-    </Routes>
+            {/* Routes WITHOUT MainLayout */}
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
+          </Routes>
+        </WishlistProvider>
+      </CartProvider>
+    </BrowserRouter>
   );
 };
 
