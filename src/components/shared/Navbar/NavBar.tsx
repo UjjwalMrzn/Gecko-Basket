@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, ShoppingCart, Heart } from "lucide-react";
 import Logo from "../../../assets/logos/GeckoBasketLogo.png";
 
-import CartIcon from "../CartIcon";
-import WishlistIcon from "../WishlistIcon";
 import UserMenu from "../UserMenu/UserMenu";
 import SearchBar from "../SearchBar/SearchBar";
-import DropDown from "../../home/DropDown/DropDown";
+import CategoriesDropDown from "../CategoriesDropDown/CategoriesDropDown";
+import useCart from "../../../hooks/usecart";
+import useWishlist from "../../../hooks/useWishlist";
 
 const Navbar = () => {
   const [userLoggedIn] = useState(true);
-  const cartCount = 2;
-  const wishlistCount = 5;
+  const { cartItems } = useCart();
+  const { wishlist } = useWishlist();
+
   const categories = [
     "Food & Beverages",
     "Electronic Devices & Accessories",
@@ -31,10 +32,12 @@ const Navbar = () => {
     <header className="w-full font-inter">
       {/* Top Offer Bar */}
       <div className="bg-gradient-to-r from-[#59b143] to-[#b1d447] h-9 flex items-center justify-center">
-        <p className="text-white text-sm capitalize">50% off on your first purchase</p>
+        <p className="text-white text-sm capitalize">
+          50% off on your first purchase
+        </p>
       </div>
 
-      {/* Middle Bar: Logo - Search - Icons */}
+      {/* Middle Bar */}
       <div className="bg-[#f0f2f3] h-[70px] flex items-center">
         <div className="container mx-auto px-4 grid grid-cols-3 items-center">
           {/* Logo */}
@@ -51,8 +54,35 @@ const Navbar = () => {
 
           {/* Icons */}
           <div className="flex justify-end items-center gap-6">
-            <CartIcon count={cartCount} />
-            <WishlistIcon count={wishlistCount} />
+            {/* Cart Icon with count */}
+            <NavLink
+              to="/cart"
+              className="relative text-[#272343] hover:text-[#59b143]"
+              aria-label="Cart"
+            >
+              <ShoppingCart size={24} />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-[#59b143] rounded-full">
+                  {cartItems.length}
+                </span>
+              )}
+            </NavLink>
+
+            {/* Wishlist Icon with count */}
+            <NavLink
+              to="/wishlist"
+              className="relative text-[#272343] hover:text-[#59b143]"
+              aria-label="Wishlist"
+            >
+              <Heart size={24} />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-[#59b143] rounded-full">
+                  {wishlist.length}
+                </span>
+              )}
+            </NavLink>
+
+            {/* User Menu */}
             <UserMenu isLoggedIn={userLoggedIn} onLogout={handleLogout} />
           </div>
         </div>
@@ -61,12 +91,12 @@ const Navbar = () => {
       {/* Bottom Navigation */}
       <nav className="bg-white border-b border-gray-200 h-[65px] flex items-center">
         <div className="container mx-auto px-4 flex items-center gap-8">
+          {/* Categories */}
           <div className="flex items-center gap-2 text-sm font-medium text-gray-700 capitalize hover:text-[#59b143]">
-            <Menu size={18} />
-            <DropDown items={categories} />
+            <CategoriesDropDown items={categories} />
           </div>
 
-          {/* Main Nav Links */}
+          {/* Navigation Links */}
           <div className="flex items-center gap-6">
             {[
               { to: "/", label: "Home" },
@@ -80,7 +110,9 @@ const Navbar = () => {
                 to={to}
                 className={({ isActive }) =>
                   `text-sm font-medium capitalize transition ${
-                    isActive ? "text-[#59b143]" : "text-gray-600 hover:text-[#59b143]"
+                    isActive
+                      ? "text-[#59b143]"
+                      : "text-gray-600 hover:text-[#59b143]"
                   }`
                 }
               >
