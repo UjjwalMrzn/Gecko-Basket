@@ -9,7 +9,7 @@ const MainLayout = () => {
     <>
       <Navbar />
       <main>
-        <Outlet /> {/* ✅ This renders nested pages */}
+        <Outlet /> {/*  This renders nested pages */}
       </main>
       <Footer />
       <StickyWhatsApp />
