@@ -1,44 +1,44 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { AuthProvider } from "./context/AuthContext";
+import { AuthModalProvider } from "./context/AuthModalContext";
 
 import MainLayout from "./Layout/MainLayout/MainLayout";
-import AuthLayout from "./Layout/AuthLayout/AuthLayout";
 import Home from "./pages/Home/Home";
 import Auth from "./pages/Auth/Auth";
-import Login from "./pages/Auth/Login/Login";
-import Register from "./pages/Auth/Register/Register";
 import Error from "./pages/Error/Error";
-import AuthCheck from "./AuthCheck/AuthCheck";
+
+import LoginModal from "./components/shared/AuthModal/LoginModal";
+import RegisterModal from "./components/shared/AuthModal/RegisterModal";
 
 const App = () => {
   return (
     <BrowserRouter>
-      <CartProvider>
-        <WishlistProvider>
-          <Routes>
-            {/* Routes WITH MainLayout */}
-            <Route element={<MainLayout />}>
-              <Route
-                path="/"
-                element={
-                  <AuthCheck>
-                    <Home />
-                  </AuthCheck>
-                }
-              />
-              <Route path="auth" element={<Auth />} />
-              <Route path="*" element={<Error />} />
-            </Route>
+      <AuthModalProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              {/* Global Modals */}
+              <LoginModal />
+              <RegisterModal />
 
-            {/* Routes WITHOUT MainLayout */}
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Route>
-          </Routes>
-        </WishlistProvider>
-      </CartProvider>
+              {/* Route Definitions */}
+              <Routes>
+                {/* Pages using MainLayout */}
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="*" element={<Error />} />
+                </Route>
+
+                {/* Add more layout-separated routes if needed */}
+              </Routes>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </AuthModalProvider>
     </BrowserRouter>
   );
 };
