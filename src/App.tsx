@@ -1,6 +1,7 @@
-import { Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar/NavBar";
-import Footer from "./components/Footer/Footer";
+// src/App.tsx
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "./Layout/MainLayout/MainLayout";
+import AuthLayout from "./Layout/AuthLayout/AuthLayout";
 import Home from "./pages/Home/Home";
 import Auth from "./pages/Auth/Auth";
 import Login from "./pages/Auth/Login/Login";
@@ -10,24 +11,27 @@ import AuthCheck from "./AuthCheck/AuthCheck";
 
 const App = () => {
   return (
-    <>
-      <Navbar />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <AuthCheck>
-                <Home />
-              </AuthCheck>
-            }
-          />
-          <Route path="auth" element={<Auth />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="*" element={<Error />} />
-        </Routes>
-      <Footer />
-    </>
+    <Routes>
+      {/*  Routes WITH MainLayout */}
+      <Route element={<MainLayout />}>
+        <Route
+          path="/"
+          element={
+            <AuthCheck>
+              <Home />
+            </AuthCheck>
+          }
+        />
+        <Route path="auth" element={<Auth />} />
+        <Route path="*" element={<Error />} />
+      </Route>
+
+      {/*  Routes WITHOUT MainLayout */}
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Route>
+    </Routes>
   );
 };
 

@@ -1,18 +1,16 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import { BrowserRouter } from 'react-router-dom';
-import MainLayout from './MainLayout/MainLayout';
+// main.tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App"; 
+import "./index.css";
 
-// Create root
-const rootElement = document.getElementById('root')!;
-const root = createRoot(rootElement);
+const root = createRoot(document.getElementById("root")!);
 
-// Render app
 root.render(
   <StrictMode>
     <BrowserRouter>
-      <MainLayout/>
+      <App /> {/* This should handle ALL routing */}
     </BrowserRouter>
   </StrictMode>
 );
