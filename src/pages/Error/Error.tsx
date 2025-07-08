@@ -3,7 +3,7 @@ import  errorimg  from "../../assets/images/error.png";
 
 const Error = () => {
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center font-inter">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 text-center font-inter">
       <img
         src={errorimg} 
         alt="Page not found"

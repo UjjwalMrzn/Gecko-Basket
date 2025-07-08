@@ -2,18 +2,20 @@ type Props = {
   label: string;
   type: string;
   value: string;
+  name?: string;
   placeholder?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
 };
 
-const Input = ({ label, type, value, placeholder, onChange, required }: Props) => {
+const Input = ({ label, type,name, value, placeholder, onChange, required }: Props) => {
   return (
     <div>
       <label className="block text-sm font-medium text-[#272343] mb-1">{label}</label>
       <input
         type={type}
         value={value}
+        name={name}
         placeholder={placeholder}
         onChange={onChange}
         required={required}
