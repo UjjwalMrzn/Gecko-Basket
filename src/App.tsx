@@ -10,7 +10,7 @@ import Home from "./pages/Home/Home";
 import Auth from "./pages/Auth/Auth";
 import Error from "./pages/Error/Error";
 import Shop from "./pages/Shop/Shop";
-import Product from "./pages/Product/Product";
+import Product from "./pages/Product/ProductDetail";
 import LoginModal from "./components/shared/AuthModal/LoginModal";
 import RegisterModal from "./components/shared/AuthModal/RegisterModal";
 

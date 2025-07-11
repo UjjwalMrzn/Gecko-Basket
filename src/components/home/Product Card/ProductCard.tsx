@@ -1,19 +1,22 @@
-import { ShoppingCart, Heart } from "lucide-react";
-import StarRating from "../../ui/StarRating";
+// src/components/home/Product Card/ProductCard.tsx
+import { Heart, ShoppingCart } from "lucide-react";
+import { Link } from "react-router-dom";
 import useCart from "../../../hooks/usecart";
 import useWishlist from "../../../hooks/useWishlist";
+import StarRating from "../../ui/StarRating";
 
 type Product = {
-  id: number;
-  title: string;
+  id: string;
+  name: string;
+  title?: string; // optional alias for older data
   category: string;
   description: string;
   price: number;
-  originalPrice?: number | null;
+  originalPrice?: number;
   image: string;
   rating: number;
   reviews: number;
-  tag?: string | null;
+  tag?: string;
 };
 
 type Props = {
@@ -24,57 +27,75 @@ const ProductCard = ({ product }: Props) => {
   const { addToCart } = useCart();
   const { addToWishlist } = useWishlist();
 
-  return (
-    <div className="group relative w-full flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 font-inter">
-      {/* Image */}
-      <div className="relative h-60 overflow-hidden rounded-t-2xl bg-gray-50">
-        <img
-          src={product.image}
-          alt={product.title}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+  const isDiscount =
+    product.originalPrice !== undefined && product.originalPrice > product.price;
 
-        {/* Badge */}
+  const discountPercent = isDiscount
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
+  return (
+    <div className="group relative bg-white rounded-xl shadow border border-gray-200 hover:shadow-md transition-all flex flex-col overflow-hidden font-inter">
+      {/* Image */}
+      <div className="relative bg-gray-50 aspect-[4/3] overflow-hidden">
+        <Link to={`/product/${product.id}`}>
+          <img
+            src={product.image}
+            alt={product.name || product.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </Link>
+
+        {/* Wishlist */}
+        <button
+          onClick={() => addToWishlist(product)}
+          className="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition z-10"
+          title="Add to Wishlist"
+        >
+          <Heart size={18} className="text-gray-700" />
+        </button>
+
+        {/* Tag */}
         {product.tag && (
-          <span className={`absolute top-2 left-2 rounded-full px-2 py-1 text-xs font-semibold text-white ${product.tag === "Sale" ? "bg-red-500" : "bg-[#59b143]"}`}>
+          <span className="absolute top-3 left-3 bg-gradient-to-r from-[#59b143] to-[#9cd67d] text-white text-[11px] font-semibold px-2 py-1 rounded-full shadow-sm uppercase tracking-wide">
             {product.tag}
           </span>
         )}
-
-        {/* Wishlist Button */}
-        <button
-          onClick={() => addToWishlist(product)}
-          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Heart size={18} className="text-gray-500" />
-        </button>
       </div>
 
       {/* Info */}
-      <div className="flex flex-col justify-between p-4 flex-grow">
-        <div>
-          <h3 className="text-lg font-semibold text-[#272343]">{product.title}</h3>
-          <p className="text-xs text-gray-500 mt-1">{product.category}</p>
-        </div>
+      <div className="flex flex-col gap-2 p-4 flex-grow">
+        <Link to={`/product/${product.id}`} className="hover:underline">
+          <h3 className="text-md font-semibold text-[#272343] truncate">
+            {product.name || product.title}
+          </h3>
+        </Link>
+        <p className="text-xs text-gray-500 capitalize">{product.category}</p>
+        <StarRating rating={product.rating} reviews={product.reviews} />
 
-        <div className="mt-3 mb-4 flex items-center justify-between">
-          <div className="flex flex-col">
+        {/* Price */}
+        <div className="flex items-center justify-between mt-2">
+          <div>
             <span className="text-lg font-bold text-[#272343]">Rs. {product.price}</span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-400 line-through">
+            {isDiscount && (
+              <span className="ml-2 text-sm text-gray-400 line-through">
                 Rs. {product.originalPrice}
               </span>
             )}
           </div>
-          <StarRating rating={product.rating} reviews={product.reviews} />
+          {isDiscount && (
+            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
+              -{discountPercent}%
+            </span>
+          )}
         </div>
 
         <button
           onClick={() => addToCart(product)}
-          className="mt-auto flex items-center justify-center rounded-md bg-[#59b143] px-5 py-2 text-sm font-semibold text-white hover:bg-[#4ca035] transition-all duration-200"
+          className="mt-3 inline-flex items-center justify-center gap-2 bg-[#59b143] hover:bg-[#4ca035] text-white text-sm font-medium px-4 py-2 rounded-lg transition w-full"
         >
-          <ShoppingCart className="mr-2 h-5 w-5" />
-          Add to cart
+          <ShoppingCart size={18} />
+          Add to Cart
         </button>
       </div>
     </div>
