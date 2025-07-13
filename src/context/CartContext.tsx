@@ -1,28 +1,45 @@
+// src/context/CartContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
 
 type Product = {
-  id: number;
-  title: string;
+  id: string;
+  name: string;
   price: number;
   image: string;
+  // Add more fields if needed
+};
+
+type CartItem = Product & {
+  quantity: number;
 };
 
 type CartContextType = {
-  cartItems: Product[];
-  addToCart: (item: Product) => void;
-  removeFromCart: (id: number) => void;
+  cartItems: CartItem[];
+  addToCart: (item: Product, quantity?: number) => void;
+  removeFromCart: (id: string) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addToCart = (item: Product) => {
-    setCartItems((prev) => [...prev, item]);
+  const addToCart = (product: Product, quantity: number = 1) => {
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        return [...prev, { ...product, quantity }];
+      }
+    });
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
