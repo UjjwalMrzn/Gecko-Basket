@@ -46,6 +46,7 @@ const Products = () => {
               <thead className="bg-[#f0f2f3] text-[#272343] text-left">
                 <tr>
                   <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Brand</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">Stock</th>
@@ -56,6 +57,7 @@ const Products = () => {
                 {products.map((p) => (
                   <tr key={p._id}>
                     <td className="px-4 py-3">{p.name}</td>
+                    <td className="px-4 py-3">{p.brand}</td>
                     <td className="px-4 py-3">{p.category}</td>
                     <td className="px-4 py-3">Rs. {p.price}</td>
                     <td className="px-4 py-3">{p.inStock ? "In Stock" : "Out of Stock"}</td>

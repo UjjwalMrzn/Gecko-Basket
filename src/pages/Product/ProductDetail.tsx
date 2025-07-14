@@ -13,7 +13,7 @@ import useCart from "../../hooks/usecart";
 import useWishlist from "../../hooks/useWishlist";
 import { fetchProductById } from "../../api/productsApi";
 
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, ShoppingBag, Plus, Minus } from "lucide-react";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -78,7 +78,8 @@ const ProductDetail = () => {
         <div className="flex flex-col justify-between">
           <div>
             <h1 className="text-3xl font-bold text-[#272343]">{product.name}</h1>
-            <p className="text-sm text-gray-500 mt-1 mb-3">{product.category}</p>
+            <p className="text-sm text-gray-500 mt-5 mb-3">Brand: {product.brand}</p>
+            {/* <p className="text-sm text-gray-500 mt-1 mb-3">{product.category}</p> */}
 
             <StarRating rating={product.rating || 0} reviews={product.reviews || 0} />
 
@@ -120,7 +121,7 @@ const ProductDetail = () => {
                 onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
                 className="px-3 py-2 text-gray-600 hover:bg-gray-100"
               >
-                –
+                <Minus size={18} />
               </button>
               <span className="px-4 py-2 text-sm font-medium text-[#272343]">
                 {quantity}
@@ -129,7 +130,7 @@ const ProductDetail = () => {
                 onClick={() => setQuantity((prev) => prev + 1)}
                 className="px-3 py-2 text-gray-600 hover:bg-gray-100"
               >
-                +
+                <Plus size={18} />
               </button>
             </div>
             </div>
@@ -143,7 +144,13 @@ const ProductDetail = () => {
           <div className="flex flex-col gap-4 mt-6 sm:flex-row sm:items-center">
          
 
-            {/* Add to Cart */}
+            <Button
+              onClick={() => addToCart(product, quantity)}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <ShoppingBag size={18} />
+              Buy
+            </Button>
             <Button
               onClick={() => addToCart(product, quantity)}
               className="flex items-center justify-center gap-2 w-full sm:w-auto"

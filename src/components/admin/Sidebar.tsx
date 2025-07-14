@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import Logo from "../../assets/logos/GeckoBasketLogo.png";
 import {
   LayoutDashboard,
   Package,
@@ -16,36 +17,44 @@ const links = [
 
 const Sidebar = () => {
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-200 shadow-md fixed top-0 left-0 z-20 px-6 py-8 font-inter hidden md:flex flex-col">
-      <h1 className="text-2xl font-bold text-[#59b143] mb-10 tracking-tight">
-        Admin Panel
-      </h1>
+    <aside className="fixed top-0 left-0 z-20 h-full w-64 flex flex-col bg-white border-r shadow-md font-inter">
+      {/* Logo */}
+      <div className="flex items-center justify-center h-20 px-6 border-b">
+        <NavLink to="/admin/dashboard">
+          <img src={Logo} alt="Logo" className="h-10 w-auto" />
+        </NavLink>
+      </div>
 
-      <nav className="flex flex-col gap-2">
+      {/* Navigation */}
+      <nav className="flex flex-col gap-1 p-4 flex-grow">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+              `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive
-                  ? "bg-[#59b143] text-white shadow-sm"
+                  ? "bg-[#eaf5e5] text-[#272343] border-l-4 border-[#59b143] shadow-sm"
                   : "text-gray-700 hover:bg-gray-100"
               }`
             }
           >
-            <Icon size={18} />
-            {label}
+            <Icon size={18} className="text-[#59b143]" />
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
 
-      <div className="mt-auto text-xs  px-4 pt-10">
-  <button className="flex items-center gap-2 mt-10 px-4 py-2 rounded-lg hover:bg-white/20 transition text-sm">
-        <LogOut size={18} />
-        Logout
-      </button>      </div>
-    
+      {/* Logout */}
+      <div className="mt-auto p-4 border-t">
+        <button
+          type="button"
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+        >
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
+      </div>
     </aside>
   );
 };

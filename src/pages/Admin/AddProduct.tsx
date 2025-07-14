@@ -2,60 +2,65 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
-import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
+import { createProduct } from "../../api/productsApi";
 
 const AddProduct = () => {
-  const { token } = useAuth(); // Get the token for API requests
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState(""); // Add state for the slug
+  const [brand, setBrand] = useState("");
+  const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("groceries");
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
-  const [countInStock, setCountInStock] = useState("50");
-  const [image, setImage] = useState(null);
+  const [countInStock, setCountInStock] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState("");
 
-  // This function updates the name and automatically generates a URL-friendly slug
-  const handleNameChange = (e) => {
+  // Auto-generate slug from name
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     setName(newName);
-    setSlug(newName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''));
+    setSlug(
+      newName
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, "")
+    );
   };
 
-  const handleSubmit = async (e) => {
+  // Fix: Separate handler for brand
+  const handleBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBrand(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!name || !slug || !description || !price || !category || !image || !countInStock) {
+    if (!name || !slug || !brand || !description || !price || !category || !image || !countInStock) {
       setError("All fields except original price are required.");
       return;
     }
 
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("slug", slug); // Send the slug
+    formData.append("slug", slug);
+    formData.append("brand", brand);
     formData.append("description", description);
     formData.append("category", category);
     formData.append("price", price);
     if (originalPrice) formData.append("originalPrice", originalPrice);
-    formData.append("brand", "Gecko Basket"); // Hardcoded brand
     formData.append("countInStock", countInStock);
     formData.append("image", image);
 
     try {
-      // Add the Authorization header to the axios request
-      await axios.post(`${import.meta.env.VITE_API_URL}/products`, formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          // 'Content-Type': 'multipart/form-data' is set automatically by axios for FormData
-        },
-      });
-      navigate("/admin/products"); // Redirect on success
-    } catch (err) {
+      await createProduct(formData, token);
+      navigate("/admin/products");
+    } catch (err: any) {
       setError(err.response?.data?.message || "Failed to add product. Please try again.");
     }
   };
@@ -72,20 +77,25 @@ const AddProduct = () => {
             label="Product Name"
             type="text"
             value={name}
-            onChange={handleNameChange} // Use the new handler here
+            onChange={handleNameChange}
+            required
+          />
+          <Input
+            label="Brand Name"
+            type="text"
+            value={brand}
+            onChange={handleBrandChange}
             required
           />
           <Input
             label="Product Slug (URL-friendly)"
             type="text"
             value={slug}
-            onChange={(e) => setSlug(e.target.value)} // Allow manual changes to the slug
+            onChange={(e) => setSlug(e.target.value)}
             required
           />
           <div>
-            <label className="block text-sm font-medium text-[#272343] mb-1">
-              Description
-            </label>
+            <label className="block text-sm font-medium text-[#272343] mb-1">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -152,3 +162,4 @@ const AddProduct = () => {
 };
 
 export default AddProduct;
+  

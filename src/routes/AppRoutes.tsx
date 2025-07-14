@@ -15,7 +15,7 @@ import Error from "../pages/Error/Error";
 import Dashboard from "../pages/Admin/Dashboard";
 import Products from "../pages/Admin/Products";
 import AddProduct from "../pages/Admin/AddProduct";
-// import EditProduct from "../pages/Admin/EditProduct";
+import EditProduct from "../pages/Admin/EditProducts";
 // import Users from "../pages/Admin/Users";
 
 const AppRoutes = () => {
@@ -33,10 +33,11 @@ const AppRoutes = () => {
       {/* Admin Routes */}
      <Route element={<ProtectedRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="products/add" element={<AddProduct />} />
-          {/* ... other admin routes */}
+          <Route path="products/edit/:id" element={<EditProduct />} />
         </Route>
         </Route>
     </Routes>
