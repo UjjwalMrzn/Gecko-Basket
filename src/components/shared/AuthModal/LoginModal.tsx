@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import googleLogo from "../../../assets/logos/google.svg";
@@ -18,30 +19,47 @@ const LoginModal = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [formError, setFormError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   if (modalType !== "login") return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    setIsLoading(true);
 
+    // Basic frontend validation remains
     if (!email.trim() || !password.trim()) {
       setFormError("Email and password are required.");
+      setIsLoading(false);
       return;
     }
 
-    if (!email.includes("@")) {
-      setFormError("Please enter a valid email.");
-      return;
-    }
+    try {
+       const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (password.length < 6) {
-      setFormError("Password must be at least 6 characters.");
-      return;
-    }
+      const data = await response.json();
 
-    login("demo-token", "ujjwal");
-    closeModal();
+      if (!response.ok) {
+        // Use the error message from the backend if available
+        throw new Error(data.message || "Login failed. Please check your credentials.");
+      }
+
+      // On a successful API call, use the login function from your context
+      login(data.user, data.token);
+      closeModal();
+
+    } catch (error: any) {
+      setFormError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -116,8 +134,8 @@ const LoginModal = () => {
           <p className="text-sm text-red-600 text-center -mt-2">{formError}</p>
         )}
 
-        <Button type="submit" fullWidth>
-          Login
+        <Button type="submit" fullWidth disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
         </Button>
       </form>
 

@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-
+import ProtectedRoute from "./ProtectedRoute";
 // Layouts
 import MainLayout from "../Layout/MainLayout/MainLayout";
 import AdminLayout from "../Layout/AdminLayout/AdminLayout";
@@ -31,14 +31,14 @@ const AppRoutes = () => {
       </Route>
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="products" element={<Products />} />
-        <Route path="products/add" element={<AddProduct />} />
-        {/* <Route path="products/edit/:id" element={<EditProduct />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="users" element={<Users />} /> */}
-      </Route>
+     <Route element={<ProtectedRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="products" element={<Products />} />
+          <Route path="products/add" element={<AddProduct />} />
+          {/* ... other admin routes */}
+        </Route>
+        </Route>
     </Routes>
   );
 };

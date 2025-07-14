@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import googleLogo from "../../../assets/logos/google.svg";
 
-import { useAuth } from "../../../context/AuthContext";
 import { useAuthModal } from "../../../context/AuthModalContext";
 
 import Modal from "../../ui/Modal";
@@ -11,68 +10,75 @@ import Button from "../../ui/Button";
 
 const RegisterModal = () => {
   const { modalType, closeModal, openModal } = useAuthModal();
-  const { login } = useAuth(); // Simulating login after register
-
-  const [username, setUsername] = useState("");
+  
+  // Changed `username` to `name` to match your backend API
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   if (modalType !== "register") return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    setIsLoading(true);
 
-    if (!username.trim() || !email.trim() || !password.trim()) {
+    if (!name.trim() || !email.trim() || !password.trim()) {
       setFormError("All fields are required.");
+      setIsLoading(false);
       return;
     }
+    
+    try {
+      // The URL is now constructed correctly
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Send `name` instead of `username`
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    if (!email.includes("@")) {
-      setFormError("Please enter a valid email.");
-      return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed. Please try again.");
+      }
+
+      // On success, switch the user to the login modal
+      alert("Registration successful! Please log in.");
+      openModal("login");
+
+    } catch (error: any) {
+      setFormError(error.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    if (password.length < 6) {
-      setFormError("Password must be at least 6 characters.");
-      return;
-    }
-
-    // Simulated register then login
-    login("demo-token", username);
-    closeModal();
   };
 
   return (
     <Modal isOpen onClose={closeModal}>
       {/* Close Button */}
-      <button
-        onClick={closeModal}
-        className="absolute top-4 right-5 text-xl text-gray-400 hover:text-black"
-        aria-label="Close"
-      >
-        &times;
-      </button>
+      <button onClick={closeModal} className="absolute top-4 right-5 text-xl text-gray-400 hover:text-black">&times;</button>
 
       {/* Heading */}
       <h2 className="text-2xl font-bold text-[#272343] mb-1 text-center">Register</h2>
-      <p className="text-sm text-gray-500 mb-6 text-center">
-        Create a Gecko Basket account
-      </p>
+      <p className="text-sm text-gray-500 mb-6 text-center">Create a Gecko Basket account</p>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
-          label="Username"
+          label="Full Name"
           type="text"
-          value={username}
+          value={name}
           placeholder="Your full name"
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
           required
         />
-
         <Input
           label="Email"
           type="email"
@@ -81,7 +87,6 @@ const RegisterModal = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-
         <div className="relative">
           <Input
             label="Password"
@@ -105,19 +110,17 @@ const RegisterModal = () => {
           <p className="text-sm text-red-600 text-center -mt-2">{formError}</p>
         )}
 
-        <Button type="submit" fullWidth>
-          Register
+        <Button type="submit" fullWidth disabled={isLoading}>
+          {isLoading ? 'Creating Account...' : 'Register'}
         </Button>
       </form>
 
-      {/* Divider */}
+      {/* Divider and Google Login */}
       <div className="flex items-center my-6">
         <div className="flex-grow h-px bg-gray-200"></div>
         <span className="px-3 text-sm text-gray-500">or continue with</span>
         <div className="flex-grow h-px bg-gray-200"></div>
       </div>
-
-      {/* Google Login */}
       <button
         onClick={() => alert("Google register not implemented")}
         className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-xl py-2.5 text-sm font-medium text-[#272343] hover:bg-gray-50 transition"

@@ -11,7 +11,8 @@ import useWishlist from "../../../hooks/useWishlist";
 import { useAuth } from "../../../context/AuthContext";
 
 const Navbar = () => {
-  const { isLoggedIn, user, logout } = useAuth();
+  // Use the user object to determine login state and get user data
+  const { user, logout } = useAuth(); 
   const { cartItems } = useCart();
   const { wishlist } = useWishlist();
 
@@ -49,16 +50,15 @@ const Navbar = () => {
 
           {/* Icons */}
           <div className="flex justify-end items-center gap-6">
-            {/* Hello, Username (only if logged in) */}
-            {isLoggedIn && (
+            {/* Display user's first name if logged in */}
+            {user && (
               <span className="text-sm font-medium text-[#272343] hidden sm:inline">
-                Hello, {user?.username}
+                
+                Hello, {user.name?.split(' ')[0]}
               </span>
             )}
             <CartIcon count={cartItems.length} />
             <WishlistIcon count={wishlist.length} />
-
-
             <UserMenu onLogout={logout} />
           </div>
         </div>
@@ -75,7 +75,6 @@ const Navbar = () => {
             {[
               { to: "/", label: "Home" },
               { to: "/shop", label: "Shop" },
-              // { to: "/product", label: "Product" },
               { to: "/about", label: "About" },
             ].map(({ to, label }) => (
               <NavLink

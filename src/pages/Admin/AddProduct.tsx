@@ -3,43 +3,60 @@ import { useNavigate } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
 const AddProduct = () => {
+  const { token } = useAuth(); // Get the token for API requests
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState(""); // Add state for the slug
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("groceries");
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
   const [countInStock, setCountInStock] = useState("50");
-  const [inStock, setInStock] = useState(true);
-  const [image, setImage] = useState<File | null>(null);
+  const [image, setImage] = useState(null);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // This function updates the name and automatically generates a URL-friendly slug
+  const handleNameChange = (e) => {
+    const newName = e.target.value;
+    setName(newName);
+    setSlug(newName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!name || !description || !price || !category || !image || !countInStock) {
+    if (!name || !slug || !description || !price || !category || !image || !countInStock) {
       setError("All fields except original price are required.");
       return;
     }
 
     const formData = new FormData();
     formData.append("name", name);
+    formData.append("slug", slug); // Send the slug
     formData.append("description", description);
     formData.append("category", category);
     formData.append("price", price);
     if (originalPrice) formData.append("originalPrice", originalPrice);
-    formData.append("brand", "Gecko Basket");
+    formData.append("brand", "Gecko Basket"); // Hardcoded brand
     formData.append("countInStock", countInStock);
     formData.append("image", image);
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/products`, formData);
-      navigate("/api/v1/products");
+      // Add the Authorization header to the axios request
+      await axios.post(`${import.meta.env.VITE_API_URL}/products`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // 'Content-Type': 'multipart/form-data' is set automatically by axios for FormData
+        },
+      });
+      navigate("/admin/products"); // Redirect on success
     } catch (err) {
-      setError("Failed to add product.");
+      setError(err.response?.data?.message || "Failed to add product. Please try again.");
     }
   };
 
@@ -55,7 +72,14 @@ const AddProduct = () => {
             label="Product Name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={handleNameChange} // Use the new handler here
+            required
+          />
+          <Input
+            label="Product Slug (URL-friendly)"
+            type="text"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)} // Allow manual changes to the slug
             required
           />
           <div>
@@ -79,9 +103,9 @@ const AddProduct = () => {
               className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#59b143] transition"
             >
               <option value="groceries">Groceries</option>
-              <option value="snacks">Snacks</option>
-              <option value="beverages">Beverages</option>
-              <option value="personal-care">Personal Care</option>
+              <option value="electronics">Electronics</option>
+              <option value="furniture">Furniture</option>
+              <option value="gym-equipment">Gym Equipment</option>
               <option value="others">Others</option>
             </select>
           </div>
@@ -106,16 +130,6 @@ const AddProduct = () => {
             onChange={(e) => setCountInStock(e.target.value)}
             required
           />
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={inStock}
-              onChange={(e) => setInStock(e.target.checked)}
-              className="accent-[#59b143] w-4 h-4"
-            />
-            <label className="text-sm text-gray-700">In Stock</label>
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-[#272343] mb-1">Product Image</label>
