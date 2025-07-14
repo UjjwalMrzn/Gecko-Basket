@@ -1,33 +1,31 @@
-import { Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar/NavBar";
-import Footer from "./components/Footer/Footer";
-import Home from "./pages/Home/Home";
-import Auth from "./pages/Auth/Auth";
-import Login from "./pages/Auth/Login/Login";
-import Register from "./pages/Auth/Register/Register";
-import Error from "./pages/Error/Error";
-import AuthCheck from "./AuthCheck/AuthCheck";
+import { BrowserRouter } from "react-router-dom";
+
+import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
+import { AuthProvider } from "./context/AuthContext";
+import { AuthModalProvider } from "./context/AuthModalContext";
+
+import LoginModal from "./components/shared/AuthModal/LoginModal";
+import RegisterModal from "./components/shared/AuthModal/RegisterModal";
+import ScrollToTop from "./components/shared/ScrollToTop/ScrollToTop";
+import AppRoutes from "./routes/AppRoutes";
 
 const App = () => {
   return (
-    <>
-      <Navbar />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <AuthCheck>
-                <Home />
-              </AuthCheck>
-            }
-          />
-          <Route path="auth" element={<Auth />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="*" element={<Error />} />
-        </Routes>
-      <Footer />
-    </>
+    <BrowserRouter>
+      <AuthModalProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <ScrollToTop />
+              <LoginModal />
+              <RegisterModal />
+              <AppRoutes />
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </AuthModalProvider>
+    </BrowserRouter>
   );
 };
 

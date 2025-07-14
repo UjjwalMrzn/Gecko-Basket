@@ -1,19 +1,10 @@
-import { Navigate, useLocation } from "react-router-dom";
-import React from "react";
+import { useAuth } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
 
-const AuthCheck: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const isAuthenticate = true;
-  const location = useLocation();
+const AuthCheck = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn } = useAuth();
 
-  if (!isAuthenticate) {
-    return (
-      <Navigate
-        to="/auth/login"
-        state={{ from: location }}
-      />
-    );
-  }
-
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
