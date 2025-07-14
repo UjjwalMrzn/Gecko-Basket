@@ -15,6 +15,8 @@ import Error from "../pages/Error/Error";
 import Dashboard from "../pages/Admin/Dashboard";
 import Products from "../pages/Admin/Products";
 import AddProduct from "../pages/Admin/AddProduct";
+import WishlistPage from "../pages/Wishlist/Wishlist";
+import CartPage from "../pages/Cart/CartPage";
 // import EditProduct from "../pages/Admin/EditProduct";
 // import Users from "../pages/Admin/Users";
 
@@ -28,6 +30,8 @@ const AppRoutes = () => {
         <Route path="/product/:id" element={<Product />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="*" element={<Error />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/cart" element={<CartPage />} />
       </Route>
 
       {/* Admin Routes */}
