@@ -1,15 +1,18 @@
 // src/api/productsApi.ts
 import axios from "axios";
+import { Product } from "../types/products"; // Assuming this is your central type definition
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1";
 
-export const fetchAllProducts = async () => {
-  const res = await axios.get(`${BASE_URL}/products`);
+// Explicitly type the return value to tell axios what to expect
+export const fetchAllProducts = async (): Promise<Product[]> => {
+  const res = await axios.get<Product[]>(`${BASE_URL}/products`);
   return res.data;
 };
 
-export const fetchProductById = async (id: string) => {
-  const res = await axios.get(`${BASE_URL}/products/${id}`);
+// Also type the single product response
+export const fetchProductById = async (id: string): Promise<Product> => {
+  const res = await axios.get<Product>(`${BASE_URL}/products/${id}`);
   return res.data;
 };
 
@@ -30,8 +33,6 @@ export const updateProduct = async (id: string, data: FormData, token: string) =
   });
   return res.data;
 };
-
-
 
 export const deleteProduct = async (id: string, token: string) => {
   const res = await axios.delete(`${BASE_URL}/products/${id}`, {

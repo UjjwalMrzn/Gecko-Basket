@@ -1,22 +1,28 @@
+// src/pages/Admin/Products.tsx
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
-
 import Skeleton from "../../components/ui/Skeleton";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
-import { fetchAllProducts } from "../../api/productsApi";
+import { fetchAllProducts, deleteProduct } from "../../api/productsApi";
+import { Product } from "../../types/products"; // Import the centralized type
+import { useAuth } from "../../context/AuthContext";
 
 const Products = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const location = useLocation();
+  const { token } = useAuth();
 
   const loadProducts = () => {
     setLoading(true);
     fetchAllProducts()
-      .then((data) => setProducts(data))
+      .then((data) => {
+        const formatted = data.map((p: any) => ({ ...p, id: p._id }));
+        setProducts(formatted);
+      })
       .catch(() => setError("Failed to fetch products"))
       .finally(() => setLoading(false));
   };
@@ -30,6 +36,22 @@ const Products = () => {
       loadProducts();
     }
   }, [location.state]);
+
+  const handleDelete = async (id: string) => {
+    if (!token) {
+      alert("You are not authorized to perform this action.");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await deleteProduct(id, token);
+        loadProducts(); // Refetch products after deletion
+      } catch (err) {
+        alert("Failed to delete product.");
+      }
+    }
+  };
 
   return (
     <section className="p-6 font-inter bg-[#f9fafb] min-h-screen">
@@ -77,10 +99,16 @@ const Products = () => {
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center gap-3">
                         <Link to={`/admin/products/edit/${p._id}`}>
-                          <Pencil size={18} className="text-blue-500 hover:text-blue-700" />
+                          <Pencil
+                            size={18}
+                            className="text-blue-500 hover:text-blue-700"
+                          />
                         </Link>
-                        <button onClick={() => alert("Delete logic later")}>
-                          <Trash2 size={18} className="text-red-500 hover:text-red-700" />
+                        <button onClick={() => handleDelete(p._id)}>
+                          <Trash2
+                            size={18}
+                            className="text-red-500 hover:text-red-700"
+                          />
                         </button>
                       </div>
                     </td>

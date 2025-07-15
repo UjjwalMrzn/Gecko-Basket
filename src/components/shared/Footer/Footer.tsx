@@ -12,6 +12,7 @@ export default function Footer() {
     { href: 'https://www.facebook.com/profile.php?id=61576932395282', icon: facebookIcon, label: 'Facebook' },
     { href: 'https://www.instagram.com/geckobasket/', icon: instagramIcon, label: 'Instagram' },
     { href: 'https://www.tiktok.com/@geckobasket?is_from_webapp=1&sender_device=pc', icon: tiktokIcon, label: 'TikTok' },
+    { href: 'https://www.linkedin.com/company/geckoworksnp', icon: linkedinIcon, label: 'LinkedIn' },
   ];
 
   return (
@@ -42,29 +43,11 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Shop Links */}
-        <nav aria-label="Shop" className="flex flex-col space-y-4 text-sm text-gray-600">
-          <h4 className="text-gray-900 font-semibold text-base">Shop</h4>
-          <ul className="space-y-2">
-            {['All Products', 'Categories', 'Offers', 'Best Sellers', 'New Arrivals'].map((item) => (
-              <li key={item}>
-                <a
-                  id='shop-link'
-                  href={`/${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="hover:text-green-600 transition"
-                >
-                  {item}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
         {/* Customer Care */}
         <nav aria-label="Customer Care" className="flex flex-col space-y-4 text-sm text-gray-600">
           <h4 className="text-gray-900 font-semibold text-base">Customer Care</h4>
           <ul className="space-y-2">
-            {['Help Center', 'Returns & Refunds', 'Shipping Info', 'Privacy Policy'].map((item) => (
+            {['Help Center', 'Returns & Refunds', 'Shipping Info', 'Contact Us'].map((item) => (
               <li key={item}>
                 <a
                   id='customer-care-link'
@@ -77,6 +60,25 @@ export default function Footer() {
             ))}
           </ul>
         </nav>
+        
+        {/* Shop Links */}
+        <nav aria-label="Gecko Basket" className="flex flex-col space-y-4 text-sm text-gray-600">
+          <h4 className="text-gray-900 font-semibold text-base">Gecko Basket</h4>
+          <ul className="space-y-2">
+            {['About' ,'Terms & Conditions', 'Privacy Policy'].map((item) => (
+              <li key={item}>
+                <a
+                  id='Basket-link'
+                  href={`/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="hover:text-green-600 transition"
+                >
+                  {item}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
 
         {/* Contact Info */}
         <address className="not-italic flex flex-col space-y-4 text-sm text-gray-600">

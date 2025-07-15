@@ -1,18 +1,17 @@
-
+// src/components/shared/AuthModal/LoginModal.tsx
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import googleLogo from "../../../assets/logos/google.svg";
-
 import { useAuth } from "../../../context/AuthContext";
 import { useAuthModal } from "../../../context/AuthModalContext";
-
 import Modal from "../../ui/Modal";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
+import { loginUser } from "../../../api/authApi"; // Import the new API function
 
 const LoginModal = () => {
   const { modalType, closeModal, openModal } = useAuthModal();
-  const { login } = useAuth();
+  const { login } = useAuth(); // From AuthContext
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +27,6 @@ const LoginModal = () => {
     setFormError("");
     setIsLoading(true);
 
-    // Basic frontend validation remains
     if (!email.trim() || !password.trim()) {
       setFormError("Email and password are required.");
       setIsLoading(false);
@@ -36,35 +34,20 @@ const LoginModal = () => {
     }
 
     try {
-       const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Use the error message from the backend if available
-        throw new Error(data.message || "Login failed. Please check your credentials.");
-      }
-
-      // On a successful API call, use the login function from your context
+      // Use the abstracted API function
+      const data = await loginUser({ email, password });
+      // On success, update the global auth state
       login(data.user, data.token);
       closeModal();
-
     } catch (error: any) {
-      setFormError(error.message);
+      setFormError(error.message || "An unknown error occurred.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Modal isOpen onClose={closeModal}>
-      {/* Close Button */}
+    <Modal isOpen={true} onClose={closeModal}>
       <button
         onClick={closeModal}
         className="absolute top-4 right-5 text-xl text-gray-400 hover:text-black"
@@ -73,13 +56,11 @@ const LoginModal = () => {
         &times;
       </button>
 
-      {/* Heading */}
       <h2 className="text-2xl font-bold text-[#272343] mb-1 text-center">Login</h2>
       <p className="text-sm text-gray-500 mb-6 text-center">
         Access your Gecko Basket account
       </p>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
           label="Email"
@@ -109,7 +90,6 @@ const LoginModal = () => {
           </button>
         </div>
 
-        {/* Remember Me + Forgot Password */}
         <div className="flex items-center justify-between text-sm">
           <label className="flex items-center gap-2 text-gray-700">
             <input
@@ -122,14 +102,13 @@ const LoginModal = () => {
           </label>
           <button
             type="button"
-            onClick={() => alert("Forgot password flow not implemented")}
             className="text-[#59b143] hover:underline"
+            onClick={() => alert("Forgot password flow not implemented")}
           >
             Forgot password?
           </button>
         </div>
 
-        {/* Error Message */}
         {formError && (
           <p className="text-sm text-red-600 text-center -mt-2">{formError}</p>
         )}
@@ -139,23 +118,20 @@ const LoginModal = () => {
         </Button>
       </form>
 
-      {/* Divider */}
       <div className="flex items-center my-6">
         <div className="flex-grow h-px bg-gray-200"></div>
         <span className="px-3 text-sm text-gray-500">or continue with</span>
         <div className="flex-grow h-px bg-gray-200"></div>
       </div>
 
-      {/* Google Login */}
       <button
         onClick={() => alert("Google login not implemented")}
         className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-xl py-2.5 text-sm font-medium text-[#272343] hover:bg-gray-50 transition"
       >
-        <img src={googleLogo} alt="Google" className="h-5 w-5" />
+        <img src="/assets/logos/google.svg" alt="Google" className="h-5 w-5" />
         Continue with Google
       </button>
 
-      {/* Switch to Register */}
       <p className="text-center text-sm text-gray-600 mt-6">
         Don’t have an account?{" "}
         <button

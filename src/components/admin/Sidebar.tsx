@@ -1,5 +1,5 @@
-import { NavLink } from "react-router-dom";
-import Logo from "../../assets/logos/GeckoBasketLogo.png";
+// src/components/admin/Sidebar.tsx
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -7,6 +7,9 @@ import {
   Users,
   LogOut,
 } from "lucide-react";
+import Logo from "../../assets/logos/GeckoBasketLogo.png";
+import Button from "../ui/Button"; // Import your custom Button
+import { useAuth } from "../../context/AuthContext"; // Import useAuth to get the logout function
 
 const links = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -16,16 +19,22 @@ const links = [
 ];
 
 const Sidebar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/"); // Redirect to the public homepage after logout
+  };
+
   return (
     <aside className="fixed top-0 left-0 z-20 h-full w-64 flex flex-col bg-white border-r shadow-md font-inter">
-      {/* Logo */}
       <div className="flex items-center justify-center h-20 px-6 border-b">
         <NavLink to="/admin/dashboard">
           <img src={Logo} alt="Logo" className="h-10 w-auto" />
         </NavLink>
       </div>
 
-      {/* Navigation */}
       <nav className="flex flex-col gap-1 p-4 flex-grow">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink
@@ -45,15 +54,15 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Logout */}
       <div className="mt-auto p-4 border-t">
-        <button
-          type="button"
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+        {/* Use the custom Button component for a consistent look */}
+        <Button
+          onClick={handleLogout}
+          className="w-full justify-start gap-3 bg-transparent text-gray-700 hover:bg-red-50 hover:text-red-600 shadow-none font-medium"
         >
           <LogOut size={18} />
           <span>Logout</span>
-        </button>
+        </Button>
       </div>
     </aside>
   );

@@ -1,18 +1,13 @@
+// src/context/AuthContext.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  role: 'user' | 'admin';
-};
+import { User } from "../types/user"; // Import the centralized User type
 
 type AuthContextType = {
   isLoggedIn: boolean;
   user: User | null;
   token: string | null;
-  authIsLoading: boolean; // 1. Add loading state to the type
+  authIsLoading: boolean;
   login: (user: User, token: string) => void;
   logout: () => void;
 };
@@ -22,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [authIsLoading, setAuthIsLoading] = useState(true); // 2. Initialize loading state to true
+  const [authIsLoading, setAuthIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,17 +31,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
     } finally {
-      // 3. Set loading to false after checking localStorage
       setAuthIsLoading(false);
     }
   }, []);
 
-  const login = (userData, tokenData) => {
+  const login = (userData: User, tokenData: string) => {
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", tokenData);
     setUser(userData);
     setToken(tokenData);
-
     if (userData.role === 'admin') {
       navigate("/admin/dashboard");
     } else {
@@ -59,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     setUser(null);
     setToken(null);
-    navigate("/login");
+    navigate("/"); // Navigate to home on logout for a better user experience
   };
 
   return (
@@ -68,7 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isLoggedIn: !!user,
         user,
         token,
-        authIsLoading, // 4. Provide the loading state
+        authIsLoading,
         login,
         logout,
       }}
@@ -80,6 +73,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
   return context;
 };

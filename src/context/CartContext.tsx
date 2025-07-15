@@ -1,14 +1,8 @@
 // src/context/CartContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
+import { Product } from "../types/products"; // Import the centralized type
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  // Add more fields if needed
-};
-
+// Define the shape of an item in the cart
 type CartItem = Product & {
   quantity: number;
 };
@@ -26,14 +20,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (product: Product, quantity: number = 1) => {
     setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
+      const existingItem = prev.find((item) => item.id === product.id);
+
+      if (existingItem) {
+        // If item exists, update its quantity
         return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
+        // Otherwise, add the new item to the cart
         return [...prev, { ...product, quantity }];
       }
     });
@@ -52,6 +49,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCartContext = () => {
   const context = useContext(CartContext);
-  if (!context) throw new Error("useCartContext must be used inside CartProvider");
+  if (!context) {
+    throw new Error("useCartContext must be used within a CartProvider");
+  }
   return context;
 };

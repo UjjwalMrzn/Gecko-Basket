@@ -1,35 +1,31 @@
 // src/hooks/useProducts.ts
 import { useEffect, useState } from "react";
-
-type BackendProduct = {
-  _id: string;
-  name: string;
-  title: string;
-  category: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  rating?: number;
-  reviews?: number;
-  tag?: string;
-};
+import { fetchAllProducts } from "../api/productsApi";
+import { Product } from "../types/products"; // Import the centralized type
 
 const useProducts = () => {
-  const [products, setProducts] = useState<BackendProduct[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    fetch("http://localhost:5000/api/v1/products")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data) => setProducts(data))
-      .catch(() => setError("Failed to load products"))
-      .finally(() => setLoading(false));
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchAllProducts();
+        const formattedProducts = data.map((product: any) => ({
+          ...product,
+          id: product._id, // Ensure frontend id matches backend _id
+        }));
+        setProducts(formattedProducts);
+      } catch (err) {
+        setError("Failed to load products.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
   }, []);
 
   return { products, loading, error };

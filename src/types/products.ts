@@ -1,17 +1,18 @@
-// src/types/Product.ts
+// src/types/products.ts
 export type Product = {
-  id: string;
+  _id: string; // From MongoDB
+  id: string;  // We will map _id to id for frontend consistency
   name: string;
-//   title: string;
-  brand: string;
-  category: string;
+  slug: string;
   description: string;
   price: number;
   originalPrice?: number;
   image: string;
-  images?: string[];
-  rating: number;
-  reviews: number;
+  brand: string;
+  category: string;
+  countInStock: number;
+  rating?: number;
+  reviews?: number;
   tag?: string;
+  inStock?: boolean;
 };
-
