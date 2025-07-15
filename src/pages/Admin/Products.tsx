@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
 
 import Skeleton from "../../components/ui/Skeleton";
@@ -11,14 +11,25 @@ const Products = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const location = useLocation();
 
-  useEffect(() => {
+  const loadProducts = () => {
     setLoading(true);
     fetchAllProducts()
       .then((data) => setProducts(data))
       .catch(() => setError("Failed to fetch products"))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadProducts();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.updated) {
+      loadProducts();
+    }
+  }, [location.state]);
 
   return (
     <section className="p-6 font-inter bg-[#f9fafb] min-h-screen">
@@ -60,7 +71,9 @@ const Products = () => {
                     <td className="px-4 py-3">{p.brand}</td>
                     <td className="px-4 py-3">{p.category}</td>
                     <td className="px-4 py-3">Rs. {p.price}</td>
-                    <td className="px-4 py-3">{p.inStock ? "In Stock" : "Out of Stock"}</td>
+                    <td className="px-4 py-3">
+                      {p.countInStock > 0 ? "In Stock" : "Out of Stock"}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center gap-3">
                         <Link to={`/admin/products/edit/${p._id}`}>

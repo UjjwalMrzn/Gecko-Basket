@@ -1,6 +1,6 @@
 // src/pages/Admin/EditProduct.tsx
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import Skeleton from "../../components/ui/Skeleton";
@@ -11,10 +11,10 @@ const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
+  const location = useLocation();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [product, setProduct] = useState<any>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -33,18 +33,17 @@ const EditProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     if (
       !product.name ||
-      !product.description ||
-      !product.price ||
-      !product.category ||
       !product.slug ||
-      !product.brand ||
-      !product.countInStock
+      !product.description ||
+      !product.category ||
+      !product.price ||
+      !product.countInStock ||
+      !product.brand
     ) {
-      setError("All fields except original price and image are required.");
+      setError("Please fill in all required fields.");
       return;
     }
 
@@ -54,15 +53,15 @@ const EditProduct = () => {
     formData.append("description", product.description);
     formData.append("category", product.category);
     formData.append("price", product.price);
-    if (product.originalPrice) formData.append("originalPrice", product.originalPrice);
-    formData.append("brand", product.brand);
     formData.append("countInStock", product.countInStock);
-    if (imageFile) formData.append("image", imageFile); // Optional new image
+    formData.append("brand", product.brand);
+    if (product.originalPrice)
+      formData.append("originalPrice", product.originalPrice);
+    if (imageFile) formData.append("image", imageFile);
 
     try {
       await updateProduct(id!, formData, token);
-      setSuccess("Product updated successfully!");
-      navigate("/admin/products");
+      navigate("/admin/products", { state: { updated: true } });
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to update product.");
     }
@@ -89,7 +88,6 @@ const EditProduct = () => {
         <h1 className="text-2xl font-bold text-[#272343] mb-6">Edit Product</h1>
 
         {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
-        {success && <p className="text-sm text-green-600 mb-4">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <Input
@@ -97,23 +95,24 @@ const EditProduct = () => {
             type="text"
             value={product.name}
             onChange={(e) => setProduct({ ...product, name: e.target.value })}
-            required
           />
           <Input
             label="Slug"
             type="text"
             value={product.slug}
             onChange={(e) => setProduct({ ...product, slug: e.target.value })}
-            required
           />
           <div>
-            <label className="block text-sm font-medium text-[#272343] mb-1">Description</label>
+            <label className="block text-sm font-medium text-[#272343] mb-1">
+              Description
+            </label>
             <textarea
-              rows={4}
               value={product.description}
-              onChange={(e) => setProduct({ ...product, description: e.target.value })}
+              onChange={(e) =>
+                setProduct({ ...product, description: e.target.value })
+              }
+              rows={4}
               className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#59b143]"
-              required
             />
           </div>
           <Input
@@ -121,55 +120,56 @@ const EditProduct = () => {
             type="text"
             value={product.category}
             onChange={(e) => setProduct({ ...product, category: e.target.value })}
-            required
           />
           <Input
-            label="Price (Rs)"
+            label="Price"
             type="number"
             value={product.price}
             onChange={(e) => setProduct({ ...product, price: e.target.value })}
-            required
           />
           <Input
             label="Original Price"
             type="number"
             value={product.originalPrice || ""}
-            onChange={(e) => setProduct({ ...product, originalPrice: e.target.value })}
+            onChange={(e) =>
+              setProduct({ ...product, originalPrice: e.target.value })
+            }
           />
           <Input
             label="Stock Count"
             type="number"
             value={product.countInStock}
-            onChange={(e) => setProduct({ ...product, countInStock: e.target.value })}
-            required
+            onChange={(e) =>
+              setProduct({ ...product, countInStock: e.target.value })
+            }
           />
           <Input
             label="Brand"
             type="text"
             value={product.brand}
             onChange={(e) => setProduct({ ...product, brand: e.target.value })}
-            required
           />
 
           <div>
-            <label className="block text-sm font-medium text-[#272343] mb-1">Product Image</label>
+            <label className="block text-sm font-medium text-[#272343] mb-1">
+              Product Image
+            </label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setImageFile(e.target.files?.[0] || null)}
               className="text-sm"
             />
-            <p className="text-xs text-gray-400 mt-1">Leave empty to keep current image</p>
+            <p className="text-xs text-gray-400 mt-1">Leave empty to keep existing image.</p>
           </div>
 
           <Button type="submit" fullWidth>
             Update Product
           </Button>
-        </form> 
+        </form>
       </div>
     </section>
   );
 };
 
 export default EditProduct;
-  
