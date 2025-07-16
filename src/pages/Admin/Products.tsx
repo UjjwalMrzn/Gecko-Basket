@@ -6,7 +6,7 @@ import Skeleton from "../../components/ui/Skeleton";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import { fetchAllProducts, deleteProduct } from "../../api/productsApi";
-import { Product } from "../../types/products"; // Import the centralized type
+import { Product } from "../../types/products";
 import { useAuth } from "../../context/AuthContext";
 
 const Products = () => {
@@ -43,12 +43,13 @@ const Products = () => {
       return;
     }
 
-    if (window.confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
       try {
         await deleteProduct(id, token);
-        loadProducts(); // Refetch products after deletion
+        // After successful deletion, refetch the product list to update the UI
+        loadProducts(); 
       } catch (err) {
-        alert("Failed to delete product.");
+        alert("Failed to delete product. Please try again.");
       }
     }
   };
@@ -71,8 +72,6 @@ const Products = () => {
           </div>
         ) : error ? (
           <ErrorMessage message={error} />
-        ) : products.length === 0 ? (
-          <p className="text-gray-500 text-sm">No products found.</p>
         ) : (
           <div className="overflow-x-auto border rounded-xl bg-white shadow-sm">
             <table className="min-w-full text-sm">

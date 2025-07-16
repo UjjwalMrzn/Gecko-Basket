@@ -6,7 +6,7 @@ import { useAuthModal } from "../../../context/AuthModalContext";
 import Modal from "../../ui/Modal";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
-import { registerUser } from "../../../api/authApi"; // Import the API function
+import { registerUser } from "../../../api/authApi"; // Import the new API function
 
 const RegisterModal = () => {
   const { modalType, closeModal, openModal } = useAuthModal();

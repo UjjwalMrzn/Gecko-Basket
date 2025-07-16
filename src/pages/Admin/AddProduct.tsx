@@ -10,39 +10,36 @@ const AddProduct = () => {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
-  const [brand, setBrand] = useState("");
   const [slug, setSlug] = useState("");
+  const [brand, setBrand] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("groceries");
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
-  const [countInStock, setCountInStock] = useState("");
+  const [countInStock, setCountInStock] = useState("50");
   const [image, setImage] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     setName(newName);
-    setSlug(
-      newName
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w-]/g, "")
-    );
-  };
-
-  // Fix: Separate handler for brand
-  const handleBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBrand(e.target.value);
+    setSlug(newName.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, ""));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     if (!name || !slug || !brand || !description || !price || !category || !image || !countInStock) {
-      setError("All fields except original price are required.");
+      setError("All fields except 'Original Price' are required.");
+      setIsLoading(false);
+      return;
+    }
+    if (!token) {
+      setError("You are not authorized. Please log in again.");
+      setIsLoading(false);
       return;
     }
 
@@ -54,14 +51,16 @@ const AddProduct = () => {
     formData.append("category", category);
     formData.append("price", price);
     if (originalPrice) formData.append("originalPrice", originalPrice);
-    formData.append("countInStock", countInStock);
+    formData.append("countInStock", countInStock); // Sent as a string, backend will parse
     formData.append("image", image);
 
     try {
       await createProduct(formData, token);
-      navigate("/admin/products");
+      navigate("/admin/products", { state: { updated: true } });
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to add product. Please try again.");
+      setError(err.response?.data?.message || "Failed to add product.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,31 +68,11 @@ const AddProduct = () => {
     <section className="p-6 font-inter bg-[#f9fafb] min-h-screen">
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8">
         <h1 className="text-2xl font-bold text-[#272343] mb-6">Add New Product</h1>
-
         {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
-
         <form onSubmit={handleSubmit} className="space-y-5">
-          <Input
-            label="Product Name"
-            type="text"
-            value={name}
-            onChange={handleNameChange}
-            required
-          />
-          <Input
-            label="Brand Name"
-            type="text"
-            value={brand}
-            onChange={handleBrandChange}
-            required
-          />
-          <Input
-            label="Product Slug (URL-friendly)"
-            type="text"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            required
-          />
+          <Input label="Product Name" type="text" value={name} onChange={handleNameChange} required />
+          <Input label="Brand Name" type="text" value={brand} onChange={(e) => setBrand(e.target.value)} required />
+          <Input label="Product Slug (URL-friendly)" type="text" value={slug} onChange={(e) => setSlug(e.target.value)} required />
           <div>
             <label className="block text-sm font-medium text-[#272343] mb-1">Description</label>
             <textarea
@@ -104,7 +83,6 @@ const AddProduct = () => {
               className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#59b143] transition"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-[#272343] mb-1">Category</label>
             <select
@@ -119,41 +97,21 @@ const AddProduct = () => {
               <option value="others">Others</option>
             </select>
           </div>
-
-          <Input
-            label="Price (Rs)"
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-          <Input
-            label="Original Price (Optional)"
-            type="number"
-            value={originalPrice}
-            onChange={(e) => setOriginalPrice(e.target.value)}
-          />
-          <Input
-            label="Stock Count"
-            type="number"
-            value={countInStock}
-            onChange={(e) => setCountInStock(e.target.value)}
-            required
-          />
-
+          <Input label="Price (Rs)" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
+          <Input label="Original Price (Optional)" type="number" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} />
+          <Input label="Stock Count" type="number" value={countInStock} onChange={(e) => setCountInStock(e.target.value)} required />
           <div>
             <label className="block text-sm font-medium text-[#272343] mb-1">Product Image</label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setImage(e.target.files?.[0] || null)}
-              className="text-sm"
+              className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#eaf5e5] file:text-[#59b143] hover:file:bg-[#d9f0d5]"
               required
             />
           </div>
-
-          <Button type="submit" fullWidth>
-            Submit Product
+          <Button type="submit" fullWidth disabled={isLoading}>
+            {isLoading ? "Submitting..." : "Submit Product"}
           </Button>
         </form>
       </div>
@@ -162,4 +120,3 @@ const AddProduct = () => {
 };
 
 export default AddProduct;
-  
