@@ -1,13 +1,14 @@
-// src/pages/Admin/Products.tsx
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
+
 import Skeleton from "../../components/ui/Skeleton";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import { fetchAllProducts, deleteProduct } from "../../api/productsApi";
 import { Product } from "../../types/products";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -15,6 +16,7 @@ const Products = () => {
   const [error, setError] = useState("");
   const location = useLocation();
   const { token } = useAuth();
+  const { addToast } = useToast();
 
   const loadProducts = () => {
     setLoading(true);
@@ -31,6 +33,7 @@ const Products = () => {
     loadProducts();
   }, []);
 
+  // Refetch products if redirected from the edit/add page
   useEffect(() => {
     if (location.state?.updated) {
       loadProducts();
@@ -39,17 +42,18 @@ const Products = () => {
 
   const handleDelete = async (id: string) => {
     if (!token) {
-      alert("You are not authorized to perform this action.");
+      addToast("You are not authorized to perform this action.", "error");
       return;
     }
 
-    if (window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+    if (window.confirm("Are you sure you want to permanently delete this product?")) {
       try {
         await deleteProduct(id, token);
-        // After successful deletion, refetch the product list to update the UI
-        loadProducts(); 
+        addToast("Product deleted successfully!", "success");
+        // Refresh the product list to show the change
+        loadProducts();
       } catch (err) {
-        alert("Failed to delete product. Please try again.");
+        addToast("Failed to delete product. Please try again.", "error");
       }
     }
   };
@@ -98,16 +102,10 @@ const Products = () => {
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center gap-3">
                         <Link to={`/admin/products/edit/${p._id}`}>
-                          <Pencil
-                            size={18}
-                            className="text-blue-500 hover:text-blue-700"
-                          />
+                          <Pencil size={18} className="text-blue-500 hover:text-blue-700" />
                         </Link>
                         <button onClick={() => handleDelete(p._id)}>
-                          <Trash2
-                            size={18}
-                            className="text-red-500 hover:text-red-700"
-                          />
+                          <Trash2 size={18} className="text-red-500 hover:text-red-700" />
                         </button>
                       </div>
                     </td>

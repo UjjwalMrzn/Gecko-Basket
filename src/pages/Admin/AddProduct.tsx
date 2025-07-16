@@ -4,10 +4,12 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { useAuth } from "../../context/AuthContext";
 import { createProduct } from "../../api/productsApi";
+import { useToast } from "../../context/ToastContext"; // Import the useToast hook
 
 const AddProduct = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const { addToast } = useToast(); // Use the toast hook
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -33,7 +35,7 @@ const AddProduct = () => {
     setIsLoading(true);
 
     if (!name || !slug || !brand || !description || !price || !category || !image || !countInStock) {
-      setError("All fields except 'Original Price' are required.");
+      setError("All fields are required.");
       setIsLoading(false);
       return;
     }
@@ -51,14 +53,17 @@ const AddProduct = () => {
     formData.append("category", category);
     formData.append("price", price);
     if (originalPrice) formData.append("originalPrice", originalPrice);
-    formData.append("countInStock", countInStock); // Sent as a string, backend will parse
+    formData.append("countInStock", countInStock);
     formData.append("image", image);
 
     try {
       await createProduct(formData, token);
+      addToast("Product added successfully!", "success");
       navigate("/admin/products", { state: { updated: true } });
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to add product.");
+      const errorMessage = err.response?.data?.message || "Failed to add product.";
+      addToast(errorMessage, "error");
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

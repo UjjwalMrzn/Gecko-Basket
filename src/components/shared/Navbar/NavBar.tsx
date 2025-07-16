@@ -25,6 +25,7 @@ const Navbar = () => {
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
   };
+  const totalCartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <header className="w-full font-inter">
@@ -57,7 +58,7 @@ const Navbar = () => {
                 Hello, {user.name?.split(' ')[0]}
               </span>
             )}
-            <CartIcon count={cartItems.length} />
+            <CartIcon count={totalCartQuantity} />
             <WishlistIcon count={wishlist.length} />
             <UserMenu onLogout={logout} />
           </div>
