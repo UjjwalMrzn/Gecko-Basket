@@ -14,14 +14,14 @@ const ProductCard = ({ product }: Props) => {
   const { addToCart } = useCart();
   const { addToWishlist } = useWishlist();
 
-  // Professional Check: Ensure originalPrice is a number and greater than price
+  // Check if originalPrice is a valid number and greater than the current price
   const isDiscount =
     typeof product.originalPrice === "number" &&
     product.originalPrice > product.price;
 
-  // Calculate discount only if it's a valid discount scenario
+  // Safely calculate the discount percentage only if a discount is valid
   const discountPercent =
-    isDiscount && product.originalPrice
+    isDiscount && product.originalPrice // This extra check makes it fully type-safe
       ? Math.round(
           ((product.originalPrice - product.price) / product.originalPrice) * 100
         )
@@ -37,6 +37,7 @@ const ProductCard = ({ product }: Props) => {
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
+
         <button
           onClick={() => addToWishlist(product)}
           className="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition z-10"
@@ -44,12 +45,14 @@ const ProductCard = ({ product }: Props) => {
         >
           <Heart size={18} className="text-gray-700" />
         </button>
+
         {product.tag && (
           <span className="absolute top-3 left-3 bg-gradient-to-r from-[#59b143] to-[#b1d447] text-white text-[11px] font-semibold px-2 py-1 rounded-full shadow-sm uppercase tracking-wide">
             {product.tag}
           </span>
         )}
       </div>
+
       <div className="flex flex-col gap-2 p-4 flex-grow">
         <Link to={`/product/${product.id}`} className="hover:underline">
           <h3 className="text-md font-semibold text-[#272343] truncate">
@@ -58,6 +61,7 @@ const ProductCard = ({ product }: Props) => {
         </Link>
         <p className="text-xs text-gray-500 capitalize">{product.category}</p>
         <StarRating rating={product.rating || 0} reviews={product.reviews || 0} />
+
         <div className="flex items-center justify-between mt-2">
           <div>
             <span className="text-lg font-bold text-[#272343]">
@@ -75,8 +79,9 @@ const ProductCard = ({ product }: Props) => {
             </span>
           )}
         </div>
+
         <button
-          onClick={() => addToCart(product)}
+          onClick={() => addToCart(product, 1)}
           className="mt-3 inline-flex items-center justify-center gap-2 bg-[#59b143] hover:bg-[#4ca035] text-white text-sm font-medium px-4 py-2 rounded-lg transition w-full"
         >
           <ShoppingCart size={18} />

@@ -1,8 +1,7 @@
-// src/context/CartContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
 import { Product } from "../types/products"; // Import the centralized type
 
-// Define the shape of an item in the cart
+// Define the shape of an item in the cart, extending the base Product type
 type CartItem = Product & {
   quantity: number;
 };
@@ -23,7 +22,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const existingItem = prev.find((item) => item.id === product.id);
 
       if (existingItem) {
-        // If item exists, update its quantity
+        // If the item already exists in the cart, update its quantity
         return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }

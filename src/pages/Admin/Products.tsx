@@ -1,3 +1,4 @@
+// src/pages/Admin/Products.tsx
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
@@ -33,7 +34,7 @@ const Products = () => {
     loadProducts();
   }, []);
 
-  // Refetch products if redirected from the edit/add page
+  // This will refetch products if we are redirected from the edit/add page
   useEffect(() => {
     if (location.state?.updated) {
       loadProducts();
@@ -50,7 +51,7 @@ const Products = () => {
       try {
         await deleteProduct(id, token);
         addToast("Product deleted successfully!", "success");
-        // Refresh the product list to show the change
+        // After successful deletion, refetch the product list to update the UI
         loadProducts();
       } catch (err) {
         addToast("Failed to delete product. Please try again.", "error");
@@ -81,9 +82,11 @@ const Products = () => {
             <table className="min-w-full text-sm">
               <thead className="bg-[#f0f2f3] text-[#272343] text-left">
                 <tr>
+                  <th className="px-4 py-3">S.N</th>
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Brand</th>
-                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3">Product ID</th>
+                  {/* <th className="px-4 py-3">Category</th> */}
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">Stock</th>
                   <th className="px-4 py-3 text-center">Actions</th>
@@ -92,9 +95,11 @@ const Products = () => {
               <tbody className="divide-y divide-gray-100">
                 {products.map((p) => (
                   <tr key={p._id}>
+                    <td className="px-4 py-3">{p.num}</td>
                     <td className="px-4 py-3">{p.name}</td>
                     <td className="px-4 py-3">{p.brand}</td>
-                    <td className="px-4 py-3">{p.category}</td>
+                    <td className="px-4 py-3">{p._id}</td>
+                    {/* <td className="px-4 py-3">{p.category}</td> */}
                     <td className="px-4 py-3">Rs. {p.price}</td>
                     <td className="px-4 py-3">
                       {p.countInStock > 0 ? "In Stock" : "Out of Stock"}
@@ -102,10 +107,16 @@ const Products = () => {
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center gap-3">
                         <Link to={`/admin/products/edit/${p._id}`}>
-                          <Pencil size={18} className="text-blue-500 hover:text-blue-700" />
+                          <Pencil
+                            size={18}
+                            className="text-blue-500 hover:text-blue-700"
+                          />
                         </Link>
                         <button onClick={() => handleDelete(p._id)}>
-                          <Trash2 size={18} className="text-red-500 hover:text-red-700" />
+                          <Trash2
+                            size={18}
+                            className="text-red-500 hover:text-red-700"
+                          />
                         </button>
                       </div>
                     </td>

@@ -12,14 +12,17 @@ const useProducts = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
+        // fetchAllProducts is now correctly typed to return Promise<Product[]>
         const data = await fetchAllProducts();
+
+        // Map the backend's _id to the frontend's id for consistency
         const formattedProducts = data.map((product: any) => ({
           ...product,
-          id: product._id, // Ensure frontend id matches backend _id
+          id: product._id,
         }));
         setProducts(formattedProducts);
       } catch (err) {
-        setError("Failed to load products.");
+        setError("Failed to load products. Please try again later.");
       } finally {
         setLoading(false);
       }

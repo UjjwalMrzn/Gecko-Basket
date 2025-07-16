@@ -1,6 +1,5 @@
-// src/context/WishlistContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
-import { Product } from "../types/products"; // Import the centralized type
+import { Product } from "../types/products"; // Import the centralized Product type
 
 type WishlistContextType = {
   wishlist: Product[];
@@ -17,7 +16,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
 
   const addToWishlist = (product: Product) => {
-    // Prevent duplicates
+    // Prevent duplicates by checking if the product is already in the wishlist
     setWishlist((prev) => {
       if (prev.find((item) => item.id === product.id)) {
         return prev;
@@ -30,6 +29,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     setWishlist((prev) => prev.filter((item) => item.id !== id));
   };
 
+  // Helper function to check if a product is already in the wishlist
   const isInWishlist = (id: string) => {
     return wishlist.some((item) => item.id === id);
   };

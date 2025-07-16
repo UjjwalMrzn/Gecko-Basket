@@ -1,9 +1,11 @@
-// src/pages/Admin/Dashboard.tsx
 import { useEffect, useState } from "react";
 import { Package, ShoppingBag, Users, DollarSign } from "lucide-react";
 import Skeleton from "../../components/ui/Skeleton";
+import { useAuth } from "../../context/AuthContext";
+import { fetchDashboardStats } from "../../api/adminApi";
 
 const Dashboard = () => {
+  const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     products: 0,
@@ -13,23 +15,32 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    setTimeout(() => {
-      setStats({
-        products: 128,
-        orders: 452,
-        users: 78,
-        revenue: 64000,
-      });
+    if (!token) {
       setLoading(false);
-    }, 1500);
-  }, []);
+      return;
+    }
+
+    const getStats = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchDashboardStats(token);
+        setStats(data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getStats();
+  }, [token]);
 
   const cards = [
     { label: "Total Products", value: stats.products, icon: Package },
     { label: "Total Orders", value: stats.orders, icon: ShoppingBag },
     { label: "Total Users", value: stats.users, icon: Users },
     {
-      label: "Revenue",
+      label: "Total Revenue",
       value: `Rs. ${stats.revenue.toLocaleString()}`,
       icon: DollarSign,
     },
@@ -38,7 +49,6 @@ const Dashboard = () => {
   return (
     <section className="w-full">
       <h1 className="text-2xl font-bold text-[#272343] mb-8">Dashboard</h1>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map(({ label, value, icon: Icon }) => (
           <div

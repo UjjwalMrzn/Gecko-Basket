@@ -1,4 +1,3 @@
-// src/components/admin/Sidebar.tsx
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -8,7 +7,8 @@ import {
   LogOut,
 } from "lucide-react";
 import Logo from "../../assets/logos/GeckoBasketLogo.png";
-import { useAuth } from "../../context/AuthContext";
+import Button from "../ui/Button"; // Import your custom Button component
+import { useAuth } from "../../context/AuthContext"; // Import useAuth for the logout function
 
 const links = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -23,19 +23,17 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/"); // Redirect to the public homepage after admin logs out
   };
 
   return (
-    <aside className="fixed top-0 left-0 z-20 h-full w-64 flex flex-col bg-white border-r shadow-sm font-inter">
-      {/* Logo Section */}
+    <aside className="fixed top-0 left-0 z-20 h-full w-64 flex flex-col bg-white border-r shadow-md font-inter">
       <div className="flex items-center justify-center h-20 px-6 border-b">
         <NavLink to="/admin/dashboard">
           <img src={Logo} alt="Gecko Basket Admin" className="h-10 w-auto" />
         </NavLink>
       </div>
 
-      {/* Navigation Links */}
       <nav className="flex flex-col gap-1 p-4 flex-grow">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink
@@ -44,8 +42,8 @@ const Sidebar = () => {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive
-                  ? "bg-[#eaf5e5] text-[#272343]"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-[#eaf5e5] text-[#272343] border-l-4 border-[#59b143] shadow-sm"
+                  : "text-gray-700 hover:bg-gray-100"
               }`
             }
           >
@@ -55,7 +53,7 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Logout Button */}
+    {/* Logout Button */}
       <div className="mt-auto p-4 border-t">
         <button
           onClick={handleLogout}
