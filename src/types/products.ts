@@ -1,17 +1,17 @@
-// The single source of truth for the Product data structure.
-export type Product = {
-  id: string; // Mapped from MongoDB's _id
+// src/types/products.ts
+
+export interface Product {
+  _id: string; // The database ID from MongoDB
+  id: string; // Keep this if you use it for other frontend logic
   name: string;
-  slug: string;
+  category: string;
   description: string;
   price: number;
-  originalPrice?: number;
+  originalPrice?: number; // Optional, for items not on sale
   image: string;
-  images?: string[]; // For gallery images
-  brand: string;
-  category: string;
   rating: number;
-  reviews: number;
-  countInStock: number; // ✅ FIX: Added the missing stock property
+  numReviews: number; // Corrected from 'reviews' to match backend
   tag?: string;
-};
+  brand: string;
+  countInStock: number;
+}

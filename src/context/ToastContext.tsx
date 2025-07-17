@@ -1,44 +1,38 @@
 // src/context/ToastContext.tsx
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import Toast from '../components/ui/Toast';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
-type ToastMessage = {
+// FIX: Add 'info' as an allowed toast type
+export type ToastType = 'success' | 'error' | 'info';
+
+interface ToastMessage {
   id: number;
   message: string;
-  type: 'success' | 'error';
-};
-
-interface ToastContextProps {
-  addToast: (message: string, type: 'success' | 'error') => void;
+  type: ToastType;
 }
 
-const ToastContext = createContext<ToastContextProps | undefined>(undefined);
+interface ToastContextType {
+  addToast: (message: string, type: ToastType) => void;
+  removeToast: (id: number) => void;
+  toasts: ToastMessage[];
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const addToast = useCallback((message: string, type: 'success' | 'error') => {
+  const addToast = useCallback((message: string, type: ToastType) => {
     const id = Date.now();
-    setToasts((prevToasts) => [...prevToasts, { id, message, type }]);
+    setToasts(prev => [...prev, { id, message, type }]);
   }, []);
 
-  const removeToast = (id: number) => {
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
-  };
+  const removeToast = useCallback((id: number) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
 
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={{ addToast, removeToast, toasts }}>
       {children}
-      <div className="fixed top-0 right-0 z-50 p-4 space-y-2">
-        {toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            onClose={() => removeToast(toast.id)}
-          />
-        ))}
-      </div>
     </ToastContext.Provider>
   );
 };

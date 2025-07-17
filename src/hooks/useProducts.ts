@@ -1,33 +1,31 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { Product } from "../types/products"; // ✅ IMPORT the centralized Product type
-
-// The local 'BackendProduct' type has been removed.
+// src/hooks/useProducts.ts
+import { useState, useEffect } from "react";
+import { Product } from "../types/products";
+import { fetchAllProducts } from "../api/productsApi"; // Import the updated function
 
 const useProducts = () => {
-  // ✅ USE the correct, centralized type for state
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true); // Start with loading true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const getProducts = async () => {
       setLoading(true);
       setError(null);
       try {
-        // ✅ USE axios for consistency and better error handling
-        const response = await axios.get<Product[]>(`${import.meta.env.VITE_API_BASE_URL}/products`);
+        // Now we get the full response and use .data
+        const response = await fetchAllProducts();
         setProducts(response.data);
-      } catch (err) {
-        console.error("Failed to fetch products:", err);
-        setError("Could not load products. Please try again later.");
+      } catch (err: unknown) {
+        setError("Failed to fetch products.");
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
-  }, []); // The empty dependency array ensures this runs only once on mount
+    getProducts();
+  }, []);
 
   return { products, loading, error };
 };

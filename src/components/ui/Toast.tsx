@@ -1,48 +1,67 @@
 // src/components/ui/Toast.tsx
 import { useEffect } from 'react';
-import { X, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
+import { CheckCircle, XCircle, Info } from 'lucide-react';
 
-type ToastProps = {
-  message: string;
-  type: 'success' | 'error';
-  onClose: () => void;
-};
+const Toast = () => {
+  const { toasts, removeToast } = useToast();
 
-const Toast = ({ message, type, onClose }: ToastProps) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 5000); // Auto-close after 5 seconds
-
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  const isSuccess = type === 'success';
-
-  const bgColor = isSuccess ? 'bg-green-50' : 'bg-red-50';
-  const textColor = isSuccess ? 'text-green-800' : 'text-red-800';
-  const iconColor = isSuccess ? 'text-green-500' : 'text-red-500';
+  if (toasts.length === 0) {
+    return null;
+  }
 
   return (
-    <div className={`fixed top-6 right-6 z-50 w-full max-w-sm rounded-lg shadow-lg p-4 flex items-start ${bgColor}`}>
-      <div className="flex-shrink-0">
-        {isSuccess ? (
-          <CheckCircle className={iconColor} />
-        ) : (
-          <AlertTriangle className={iconColor} />
-        )}
+    <div className="fixed top-24 right-5 z-[100] space-y-3">
+      {toasts.map(toast => (
+        <ToastItem key={toast.id} {...toast} onDismiss={() => removeToast(toast.id)} />
+      ))}
+    </div>
+  );
+};
+
+// Individual toast item component
+const ToastItem = ({ message, type, onDismiss }: { message: string, type: string, onDismiss: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onDismiss();
+    }, 4000); // Auto-dismiss after 4 seconds
+
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  const typeStyles = {
+    success: {
+      bg: 'bg-green-100',
+      border: 'border-green-400',
+      text: 'text-green-800',
+      icon: <CheckCircle className="text-green-500" size={20} />,
+    },
+    error: {
+      bg: 'bg-red-100',
+      border: 'border-red-400',
+      text: 'text-red-800',
+      icon: <XCircle className="text-red-500" size={20} />,
+    },
+    // FIX: Add styles for the 'info' type
+    info: {
+      bg: 'bg-blue-100',
+      border: 'border-blue-400',
+      text: 'text-blue-800',
+      icon: <Info className="text-blue-500" size={20} />,
+    },
+  };
+
+  const styles = typeStyles[type as keyof typeof typeStyles] || typeStyles.info;
+
+  return (
+    <div className={`flex items-center gap-4 w-full max-w-xs p-4 rounded-lg shadow-lg border-l-4 ${styles.bg} ${styles.border}`} role="alert">
+      {styles.icon}
+      <div className={`text-sm font-medium ${styles.text}`}>
+        {message}
       </div>
-      <div className={`ml-3 w-0 flex-1 pt-0.5 ${textColor}`}>
-        <p className="text-sm font-medium">{message}</p>
-      </div>
-      <div className="ml-4 flex-shrink-0 flex">
-        <button
-          onClick={onClose}
-          className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${textColor} hover:bg-opacity-50`}
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
+      <button onClick={onDismiss} className="ml-auto -mx-1.5 -my-1.5 p-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 inline-flex h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100">
+        &times;
+      </button>
     </div>
   );
 };
