@@ -1,26 +1,23 @@
-// src/layouts/AdminLayout.tsx
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../../components/admin/Sidebar";
 import AdminHeader from "../../components/admin/AdminHeader";
 
 const AdminLayout = () => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="flex font-inter">
-      {/* Fixed Sidebar */}
-      <AdminSidebar />
+    <div className="flex min-h-screen font-inter bg-gray-50">
+      <AdminSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main Content */}
-      <main className="flex-1 ml-64 bg-[#fdfcf2] min-h-screen">
-        {/* Sticky Admin Header */}
-        <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-          <AdminHeader />
-        </div>
-
-        {/* Page Content */}
-        <div className="p-6">
+      <div className="flex-1 flex flex-col lg:ml-64">
+        {/* Pass the toggle function to the header */}
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+        
+        <main className="p-4 sm:p-6 flex-grow">
           <Outlet />
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

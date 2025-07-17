@@ -1,17 +1,17 @@
+// The single source of truth for the Product data structure.
 export type Product = {
-  _id: string; // The unique ID from MongoDB
-  id: string;  // We will map _id to id for frontend consistency
+  id: string; // Mapped from MongoDB's _id
   name: string;
   slug: string;
   description: string;
   price: number;
   originalPrice?: number;
-  image: string;      // The primary image URL
-  images?: string[];  // An optional array for multiple image URLs
+  image: string;
+  images?: string[]; // For gallery images
   brand: string;
   category: string;
-  countInStock: number;
-  rating?: number;
-  reviews?: number;
+  rating: number;
+  reviews: number;
+  countInStock: number; // ✅ FIX: Added the missing stock property
   tag?: string;
 };

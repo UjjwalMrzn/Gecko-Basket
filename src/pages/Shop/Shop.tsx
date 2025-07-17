@@ -1,8 +1,8 @@
-// src/pages/Shop/Shop.tsx
 import useProducts from "../../hooks/useProducts";
 import ProductCard from "../../components/home/Product Card/ProductCard";
 import Skeleton from "../../components/ui/Skeleton";
 import ErrorMessage from "../../components/ui/ErrorMessage";
+import { Product } from "../../types/products"; // ✅ IMPORT the centralized Product type
 
 const Shop = () => {
   const { products, loading, error } = useProducts();
@@ -17,14 +17,11 @@ const Shop = () => {
           Browse our complete range of products selected just for you.
         </p>
 
-        {/* 🔁 Show Skeletons */}
         {loading ? (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          // ✅ Standardized Skeleton Layout
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-3"
-              >
+              <div key={i} className="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-3">
                 <Skeleton className="aspect-[4/3] w-full rounded-lg" />
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
@@ -36,24 +33,10 @@ const Shop = () => {
         ) : error ? (
           <ErrorMessage message={error} />
         ) : (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products.map((p) => (
-              <ProductCard
-                key={p._id}
-                product={{
-                  id: p._id,
-                  name: p.name,
-                  title: p.title,
-                  category: p.category,
-                  description: p.description,
-                  price: p.price,
-                  originalPrice: p.originalPrice ?? undefined,
-                  image: p.image,
-                  rating: p.rating ?? 0,
-                  reviews: p.reviews ?? 0,
-                  tag: p.tag ?? undefined,
-                }}
-              />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* ✅ CLEAN: Pass the product object directly. No more manual mapping. */}
+            {products.map((product: Product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}

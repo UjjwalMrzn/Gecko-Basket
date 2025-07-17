@@ -1,82 +1,106 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { Product } from '../types/products'; // ✅ IMPORT the correct, centralized Product type
 
-// 1. Define the shape of a product to help TypeScript
-interface Product {
-  _id: string;
-  name: string;
-  // Add any other product properties you need here
+// ✅ FIX: Define the expected shape of the API response from the backend
+interface WishlistApiResponse {
+  products: Product[];
+  // Add other properties if your API sends them e.g., _id, user
 }
 
-// 2. Correct the API URL to the full path
-const API_URL = `${import.meta.env.VITE_API_URL}/wishlist`;
+// Centralize the API URL for consistency
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/wishlist`;
 
 const useWishlist = () => {
-  const { token, user } = useAuth();
-  // 3. Give the wishlist state a specific type
+  const { user, token, authIsLoading } = useAuth();
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchWishlist = async () => {
-      if (user && token) {
-        setLoading(true);
-        try {
-          const response = await axios.get(API_URL, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          // Tell TypeScript to expect an array of Products
-          setWishlist(response.data as Product[]);
-        } catch (error) {
-          console.error("Failed to fetch wishlist", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
+      if (!user || !token) {
         setWishlist([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // ✅ FIX: Tell axios the expected response type using generics
+        const response = await axios.get<WishlistApiResponse>(API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // TypeScript now knows response.data contains a 'products' array
+        setWishlist(response.data.products || []);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch wishlist:", err);
+        setError("Could not load your wishlist. Please try again.");
+        setWishlist([]);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchWishlist();
-  }, [user, token]);
+    if (!authIsLoading) {
+      fetchWishlist();
+    }
+  }, [user, token, authIsLoading]);
 
-  // 4. Add types to all function parameters
+  // Add a product to the wishlist
   const addToWishlist = async (product: Product) => {
-    if (!token) throw new Error("Please log in to add to wishlist.");
-    
-    setWishlist(prev => [...prev, product]);
-    
+    if (!token) {
+      alert("Please log in to add items to your wishlist.");
+      return;
+    }
+
+    // Prevent adding duplicates to the UI
+    if (wishlist.some(p => p.id === product.id)) {
+        return;
+    }
+
     try {
-      await axios.post(API_URL, { productId: product._id }, {
+      // Optimistic UI update
+      setWishlist(prev => [...prev, product]);
+
+      // Sync with backend
+      await axios.post(API_URL, { productId: product.id }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch (error) {
-      setWishlist(prev => prev.filter(p => p._id !== product._id));
-      throw new Error("Failed to add product to wishlist.");
+    } catch (err) {
+      console.error("Failed to add to wishlist:", err);
+      // Revert the optimistic update on failure
+      setWishlist(prev => prev.filter(p => p.id !== product.id));
+      alert("Could not add item to wishlist. Please try again.");
     }
   };
 
+  // Remove a product from the wishlist
   const removeFromWishlist = async (productId: string) => {
-    if (!token) throw new Error("Please log in to manage your wishlist.");
-    
-    setWishlist(prev => prev.filter(p => p._id !== productId));
-    
+    if (!token) return;
+
     try {
+      // Optimistic UI update
+      setWishlist(prev => prev.filter(p => p.id !== productId));
+      
+      // Sync with backend
       await axios.delete(`${API_URL}/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-    } catch (error) {
-      console.error("Failed to remove product from wishlist", error);
+    } catch (err) {
+      console.error("Failed to remove from wishlist:", err);
+      alert("Could not remove item from wishlist. Please try again.");
+      // Optionally, revert the optimistic update by re-fetching the wishlist
     }
   };
-
+  
   const isInWishlist = (productId: string) => {
-    return wishlist.some(product => product._id === productId);
+    return wishlist.some(product => product.id === productId);
   };
 
-  return { wishlist, addToWishlist, removeFromWishlist, isInWishlist, loading };
+  return { wishlist, addToWishlist, removeFromWishlist, isInWishlist, loading, error };
 };
 
 export default useWishlist;

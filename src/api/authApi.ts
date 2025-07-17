@@ -1,24 +1,51 @@
-// src/api/authApi.ts
-import axios from "axios";
-import { User } from "../types/user"; // Create or import a User type
+import axios from 'axios';
+import { User } from '../types/user';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/auth`;
-
-// Define the shape of the response from the login API
+// Define the shape of the successful login response from your backend
 interface LoginResponse {
-  user: User;
   token: string;
+  user: User;
 }
 
-export const loginUser = async (credentials: { email: string; password: string }): Promise<LoginResponse> => {
-  const response = await axios.post<LoginResponse>(`${API_URL}/login`, credentials);
-  if (response.data && response.data.token) {
+// Define the credentials required for the login function
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+// Define the data required for the registration function
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+// Centralized API function for user login
+export const loginUser = async (credentials: LoginCredentials): Promise<LoginResponse> => {
+  try {
+    const response = await axios.post<LoginResponse>(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, credentials);
     return response.data;
+  } catch (error: any) { // ✅ FIX: Type error as 'any' to inspect its properties
+    // ✅ FIX: Check for the response property directly instead of using isAxiosError
+    if (error.response && error.response.data && error.response.data.message) {
+      // Re-throw the specific error message from the backend
+      throw new Error(error.response.data.message);
+    }
+    // Generic fallback error
+    throw new Error('An unexpected error occurred during login.');
   }
-  throw new Error("Login failed. Please check your credentials.");
 };
 
-export const registerUser = async (userData: { name: string; email: string; password: string }) => {
-  const response = await axios.post(`${API_URL}/register`, userData);
-  return response.data;
+// Centralized API function for user registration
+export const registerUser = async (userData: RegisterData): Promise<{ message: string }> => {
+  try {
+    const response = await axios.post<{ message: string }>(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, userData);
+    return response.data;
+  } catch (error: any) { // ✅ FIX: Type error as 'any'
+    // ✅ FIX: Check for the response property directly
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error('An unexpected error occurred during registration.');
+  }
 };

@@ -1,35 +1,33 @@
-// src/hooks/useProducts.ts
 import { useEffect, useState } from "react";
-import { fetchAllProducts } from "../api/productsApi";
-import { Product } from "../types/products"; // Import the centralized type
+import axios from "axios";
+import { Product } from "../types/products"; // ✅ IMPORT the centralized Product type
+
+// The local 'BackendProduct' type has been removed.
 
 const useProducts = () => {
+  // ✅ USE the correct, centralized type for state
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true); // Start with loading true
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const fetchProducts = async () => {
       setLoading(true);
+      setError(null);
       try {
-        // fetchAllProducts is now correctly typed to return Promise<Product[]>
-        const data = await fetchAllProducts();
-
-        // Map the backend's _id to the frontend's id for consistency
-        const formattedProducts = data.map((product: any) => ({
-          ...product,
-          id: product._id,
-        }));
-        setProducts(formattedProducts);
+        // ✅ USE axios for consistency and better error handling
+        const response = await axios.get<Product[]>(`${import.meta.env.VITE_API_BASE_URL}/products`);
+        setProducts(response.data);
       } catch (err) {
-        setError("Failed to load products. Please try again later.");
+        console.error("Failed to fetch products:", err);
+        setError("Could not load products. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    loadProducts();
-  }, []);
+    fetchProducts();
+  }, []); // The empty dependency array ensures this runs only once on mount
 
   return { products, loading, error };
 };
