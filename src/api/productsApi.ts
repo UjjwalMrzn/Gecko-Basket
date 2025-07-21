@@ -1,10 +1,8 @@
-// src/api/productsApi.ts
 import axios from "axios";
 import { Product } from "../types/products";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
-// This now returns the full AxiosResponse promise, consistent with other API calls
 export const fetchAllProducts = () => {
   return axios.get<Product[]>(API_URL);
 };
@@ -21,7 +19,8 @@ export const createProduct = async (data: FormData, token: string) => {
   return res.data;
 };
 
-export const updateProduct = async (id: string, data: FormData, token: string) => {
+// ✅ FIX: This function now correctly accepts either FormData or a plain object for the data payload.
+export const updateProduct = async (id: string, data: FormData | Partial<Product>, token: string) => {
   const res = await axios.put<Product>(`${API_URL}/${id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });

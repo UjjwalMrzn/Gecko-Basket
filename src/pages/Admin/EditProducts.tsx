@@ -1,174 +1,128 @@
-// src/pages/Admin/EditProduct.tsx
-import { useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { Product } from "../../types/products";
+import { fetchProductById, updateProduct } from "../../api/productsApi";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
-import Skeleton from "../../components/ui/Skeleton";
-import { fetchProductById, updateProduct } from "../../api/productsApi";
-import { useAuth } from "../../context/AuthContext";
+import Loader from "../../components/ui/Loader";
 
 const EditProduct = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { token } = useAuth();
-  const location = useLocation();
+  const { addToast } = useToast();
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Partial<Product>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-
-    fetchProductById(id)
-      .then((data) => {
-        setProduct(data);
-        setError("");
-      })
-      .catch(() => setError("Failed to load product."))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (
-      !product.name ||
-      !product.slug ||
-      !product.description ||
-      !product.category ||
-      !product.price ||
-      !product.countInStock ||
-      !product.brand
-    ) {
-      setError("Please fill in all required fields.");
+    if (!id) {
+      navigate("/admin/products");
       return;
     }
+    const loadProduct = async () => {
+      try {
+        const data = await fetchProductById(id);
+        setProduct(data);
+        setImagePreview(data.image);
+      } catch (error) {
+        addToast("Failed to load product.", "error");
+        navigate("/admin/products");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProduct();
+  }, [id, navigate, addToast]);
 
-    const formData = new FormData();
-    formData.append("name", product.name);
-    formData.append("slug", product.slug);
-    formData.append("description", product.description);
-    formData.append("category", product.category);
-    formData.append("price", product.price);
-    formData.append("countInStock", product.countInStock);
-    formData.append("brand", product.brand);
-    if (product.originalPrice)
-      formData.append("originalPrice", product.originalPrice);
-    if (imageFile) formData.append("image", imageFile);
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setProduct(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      addToast("Image updates are not supported by the current backend. Please ask your friend to add image upload handling to the product update route.", "info");
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!token || !id) return;
+    setIsSubmitting(true);
 
     try {
-      await updateProduct(id!, formData, token);
+      // ✅ THE DEFINITIVE FIX:
+      // We will now ONLY send a plain JSON object because the backend PUT route
+      // does not support FormData for image uploads. This will make text edits work.
+      await updateProduct(id, product, token);
+      
+      addToast("Product updated successfully!", "success");
       navigate("/admin/products", { state: { updated: true } });
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update product.");
+
+    } catch (error) {
+      console.error("Update failed:", error);
+      addToast("Failed to update product. Check console for details.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (loading) {
-    return (
-      <section className="p-6 font-inter bg-[#f9fafb] min-h-screen">
-        <div className="max-w-2xl mx-auto space-y-4">
-          <Skeleton className="h-8 w-1/2" />
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
-          ))}
-        </div>
-      </section>
-    );
+    return <div className="flex justify-center items-center h-96"><Loader /></div>;
   }
 
-  if (!product) return null;
-
   return (
-    <section className="p-6 font-inter bg-[#f9fafb] min-h-screen">
-      <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8">
-        <h1 className="text-2xl font-bold text-[#272343] mb-6">Edit Product</h1>
-
-        {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <Input
-            label="Product Name"
-            type="text"
-            value={product.name}
-            onChange={(e) => setProduct({ ...product, name: e.target.value })}
-          />
-          <Input
-            label="Slug"
-            type="text"
-            value={product.slug}
-            onChange={(e) => setProduct({ ...product, slug: e.target.value })}
-          />
+    <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold text-[#272343] mb-6">Edit Product</h1>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Input label="Product Name" type="text" name="name" value={product.name || ''} onChange={handleChange} required />
+          <Input label="Brand Name" type="text" name="brand" value={product.brand || ''} onChange={handleChange} required />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-[#272343] mb-1.5">Description</label>
+          <textarea name="description" value={product.description || ''} onChange={handleChange} rows={4} required className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#59b143] transition" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-[#272343] mb-1">
-              Description
-            </label>
-            <textarea
-              value={product.description}
-              onChange={(e) =>
-                setProduct({ ...product, description: e.target.value })
-              }
-              rows={4}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#59b143]"
-            />
+            <label className="block text-sm font-medium text-[#272343] mb-1.5">Category</label>
+            <select name="category" value={product.category || ''} onChange={handleChange} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#59b143] transition">
+              <option value="groceries">Groceries</option>
+              <option value="electronics">Electronics</option>
+              <option value="health-wellness">Health & Wellness</option>
+              <option value="others">Others</option>
+            </select>
           </div>
-          <Input
-            label="Category"
-            type="text"
-            value={product.category}
-            onChange={(e) => setProduct({ ...product, category: e.target.value })}
-          />
-          <Input
-            label="Price"
-            type="number"
-            value={product.price}
-            onChange={(e) => setProduct({ ...product, price: e.target.value })}
-          />
-          <Input
-            label="Original Price"
-            type="number"
-            value={product.originalPrice || ""}
-            onChange={(e) =>
-              setProduct({ ...product, originalPrice: e.target.value })
-            }
-          />
-          <Input
-            label="Stock Count"
-            type="number"
-            value={product.countInStock}
-            onChange={(e) =>
-              setProduct({ ...product, countInStock: e.target.value })
-            }
-          />
-          <Input
-            label="Brand"
-            type="text"
-            value={product.brand}
-            onChange={(e) => setProduct({ ...product, brand: e.target.value })}
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-[#272343] mb-1">
-              Product Image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-              className="text-sm"
-            />
-            <p className="text-xs text-gray-400 mt-1">Leave empty to keep existing image.</p>
+          <Input label="Stock Count" type="number" name="countInStock" value={product.countInStock || 0} onChange={handleChange} required />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Input label="Price (Rs)" type="number" name="price" value={product.price || 0} onChange={handleChange} required />
+          <Input label="Original Price (Optional)" type="number" name="originalPrice" value={product.originalPrice || ''} onChange={handleChange} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-[#272343] mb-1.5">Product Image</label>
+          <div className="flex items-center gap-4">
+            {imagePreview && <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover border" />}
+            <input type="file" accept="image/*" onChange={handleImageChange} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100" />
           </div>
-
-          <Button type="submit" fullWidth>
-            Update Product
+          <p className="text-xs text-gray-400 mt-1">Note: Image updates are currently not supported by the backend.</p>
+        </div>
+        <div className="pt-4">
+          <Button type="submit" fullWidth disabled={isSubmitting}>
+            {isSubmitting ? 'Updating...' : 'Update Product'}
           </Button>
-        </form>
-      </div>
-    </section>
+        </div>
+      </form>
+    </div>
   );
 };
 

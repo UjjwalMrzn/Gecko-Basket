@@ -1,11 +1,12 @@
 // src/components/home/Product Card/ProductCard.tsx
 import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
-import useCart from "../../../hooks/usecart";
-import useWishlist from "../../../hooks/useWishlist";
 import Button from "../../ui/Button";
 import StarRating from "../../ui/StarRating";
 import { Product } from "../../../types/products";
+// ✅ FIX: Correctly import the hooks from the context files
+import { useCart } from "../../../context/CartContext";
+import { useWishlist } from "../../../context/WishlistContext";
 
 type Props = {
   product: Product;
@@ -17,19 +18,12 @@ const ProductCard = ({ product }: Props) => {
 
   const isDiscounted = product.originalPrice != null && product.originalPrice > product.price;
 
-  // This function calculates the discount percentage. By putting the logic
-  // in a function, we ensure the calculation only happens when originalPrice is valid.
-  const getDiscountPercent = () => {
-    if (!isDiscounted || product.originalPrice == null) {
-      return 0;
-    }
-    // Inside this block, TypeScript knows originalPrice is a number.
-    return Math.round(
+  let discountPercent = 0;
+  if (isDiscounted && product.originalPrice) {
+    discountPercent = Math.round(
       ((product.originalPrice - product.price) / product.originalPrice) * 100
     );
-  };
-
-  const discountPercent = getDiscountPercent();
+  }
 
   return (
     <Link

@@ -1,107 +1,58 @@
 // src/context/WishlistContext.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
-import { useAuth } from './AuthContext';
-import { useToast } from './ToastContext';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Product } from '../types/products';
-
-// Define the shape of the data we expect from the API
-interface FetchWishlistResponse {
-  wishlist: Product[];
-}
+import { useToast } from './ToastContext';
 
 interface WishlistContextType {
   wishlist: Product[];
-  loading: boolean;
-  addToWishlist: (product: Product) => Promise<void>;
-  removeFromWishlist: (productId: string) => Promise<void>;
+  addToWishlist: (product: Product) => void;
+  removeFromWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-const API_URL = `${import.meta.env.VITE_API_URL}/wishlist`;
-
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
-  const { user, token } = useAuth();
   const { addToast } = useToast();
-  const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [wishlist, setWishlist] = useState<Product[]>(() => {
+    try {
+      const localData = localStorage.getItem('gecko-wishlist');
+      return localData ? JSON.parse(localData) : [];
+    } catch (error) {
+      return [];
+    }
+  });
 
   useEffect(() => {
-    const fetchWishlist = async () => {
-      if (user && token) {
-        setLoading(true);
-        try {
-          const { data } = await axios.get<FetchWishlistResponse>(API_URL, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setWishlist(data.wishlist || []);
-        } catch (error) {
-          console.error("Failed to fetch wishlist", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setWishlist([]);
-      }
-    };
-    fetchWishlist();
-  }, [user, token]);
+    localStorage.setItem('gecko-wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
 
-  const isInWishlist = (productId: string) => {
+  const isInWishlist = useCallback((productId: string) => {
     return wishlist.some(p => p._id === productId);
-  };
+  }, [wishlist]);
 
-  const addToWishlist = async (product: Product) => {
-    if (!token) {
-      addToast("Please log in to add items to your wishlist.", "error");
-      return;
-    }
+  const removeFromWishlist = useCallback((productId: string) => {
+    setWishlist(prev => prev.filter(p => p._id !== productId));
+    addToast('Item removed from wishlist', 'info');
+  }, [addToast]);
+
+  const addToWishlist = useCallback((product: Product) => {
     if (isInWishlist(product._id)) {
-      addToast(`${product.name} is already in your wishlist.`, "info");
-      return;
+      removeFromWishlist(product._id);
+    } else {
+      setWishlist(prev => [...prev, product]);
+      addToast(`${product.name} added to wishlist`, 'success');
     }
-
-    const originalWishlist = [...wishlist];
-    setWishlist(prev => [...prev, product]); // Optimistic update
-
-    try {
-      await axios.post(API_URL, { productId: product._id }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      addToast(`${product.name} added to wishlist!`, "success");
-    } catch (error) {
-      addToast("Could not add item to wishlist.", "error");
-      setWishlist(originalWishlist); // Revert on failure
-    }
-  };
-
-  const removeFromWishlist = async (productId: string) => {
-    if (!token) return;
-    
-    const originalWishlist = [...wishlist];
-    const productName = originalWishlist.find(p => p._id === productId)?.name;
-    setWishlist(prev => prev.filter(p => p._id !== productId)); // Optimistic update
-
-    try {
-      await axios.delete(`${API_URL}/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (productName) addToast(`${productName} removed from wishlist.`, "info");
-    } catch (error) {
-      addToast("Could not remove item from wishlist.", "error");
-      setWishlist(originalWishlist); // Revert on failure
-    }
-  };
+  }, [addToast, isInWishlist, removeFromWishlist]);
 
   return (
-    <WishlistContext.Provider value={{ wishlist, loading, addToWishlist, removeFromWishlist, isInWishlist }}>
+    <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist, isInWishlist }}>
       {children}
     </WishlistContext.Provider>
   );
 };
 
+// This is the correct, centralized hook for the wishlist.
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
   if (context === undefined) {

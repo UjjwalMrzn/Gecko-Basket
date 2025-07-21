@@ -9,9 +9,9 @@ import UserMenu from "../UserMenu/UserMenu";
 import SearchBar from "../SearchBar/SearchBar";
 import CategoriesDropDown from "../CategoriesDropDown/CategoriesDropDown";
 import { useAuth } from "../../../context/AuthContext";
-import useCart from "../../../hooks/usecart";
-import useWishlist from "../../../hooks/useWishlist";
-import { CartItem } from "../../../context/CartContext";
+// ✅ FIX: Correctly import the hooks from the context files
+import { useCart, CartItem } from "../../../context/CartContext";
+import { useWishlist } from "../../../context/WishlistContext";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -30,24 +30,19 @@ const Navbar = () => {
 
   return (
     <header className="w-full font-inter shadow-sm">
-      {/* Top Bar - Unchanged */}
       <div className="bg-gradient-to-r from-[#59b143] to-[#b1d447] h-9 flex items-center justify-center px-4">
         <p className="text-white text-xs sm:text-sm text-center">
           50% off on your first purchase
         </p>
       </div>
-
-      {/* Middle Bar - Now with responsive hamburger menu */}
       <div className="bg-[#f0f2f3]">
         <div className="container mx-auto px-4 flex items-center justify-between h-[70px]">
           <Link to="/">
             <img src={Logo} alt="Gecko Basket Logo" className="h-10 sm:h-12 w-auto" />
           </Link>
-
           <div className="hidden lg:flex flex-1 justify-center px-8">
             <SearchBar onSubmit={(q) => console.log(q)} />
           </div>
-
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="hidden sm:flex items-center gap-4">
               <WishlistIcon count={wishlist.length} />
@@ -64,8 +59,6 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-
-      {/* Bottom Bar - Kept original structure, now hidden on mobile */}
       <nav className="hidden lg:flex bg-white border-t border-gray-200 h-[65px] items-center">
         <div className="container mx-auto px-4 flex items-center gap-8">
           <CategoriesDropDown items={categories} />
@@ -80,8 +73,6 @@ const Navbar = () => {
           ))}
         </div>
       </nav>
-
-      {/* Mobile Menu Overlay - Clean and simple */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div className="fixed inset-0 bg-black/40" onClick={() => setIsMobileMenuOpen(false)}></div>
