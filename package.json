@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@iconify/icons-fa6-brands": "^1.2.11",
     "@iconify/icons-fa6-solid": "^1.2.13",
     "@iconify/react": "^6.0.0",

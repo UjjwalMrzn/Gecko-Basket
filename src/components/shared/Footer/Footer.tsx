@@ -26,9 +26,10 @@ const linkSections = [
     {
         title: 'Customer Care',
         links: [
-            { label: 'Help Center', to: '/help-center' },
-            { label: 'Returns & Refunds', to: '/returns' },
-            { label: 'Privacy Policy', to: '/privacy-policy' },
+            { label: 'Help Center', to: '/helpcenter' },
+            { label: 'Returns & Refunds', to: '/return' },
+            { label: 'Privacy Policy', to: '/privacy' },
+            { label:'Terms & Conditions', to:'/termscondition'},
         ]
     }
 ];

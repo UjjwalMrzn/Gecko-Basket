@@ -7,10 +7,15 @@ import AdminLayout from "../Layout/AdminLayout/AdminLayout";
 // Pages
 import Home from "../pages/Home/Home";
 import Shop from "../pages/Shop/Shop";
+import About from"../pages/About/About";
+import Contact from '../pages/Contact/Contact';
 import Product from "../pages/Product/ProductDetail";
 import Auth from "../pages/Auth/Auth";
 import Error from "../pages/Error/Error";
-
+import Helpcenter from '../pages/Helpcenter/Helpcenter';
+import Return from '../pages/Return/Return';
+import Privacy from '../pages/Privacy/Privacy';
+import Termscondition from '../pages/Termscondition/Termscondition';
 // Admin Pages
 import Dashboard from "../pages/Admin/Dashboard";
 import Products from "../pages/Admin/Products";
@@ -27,11 +32,18 @@ const AppRoutes = () => {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/about" element={<About/>}/>
+        <Route path="/contact" element={<Contact />} />
         <Route path="/product/:id" element={<Product />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="*" element={<Error />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/helpcenter" element={<Helpcenter />} />
+        <Route path="/return" element={<Return />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/termscondition" element={<Termscondition />} />
+
       </Route>
 
       {/* Admin Routes */}
