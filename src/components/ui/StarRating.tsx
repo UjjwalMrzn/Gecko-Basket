@@ -1,4 +1,3 @@
-// src/components/ui/StarRating.tsx
 import { Star } from 'lucide-react';
 
 type Props = {

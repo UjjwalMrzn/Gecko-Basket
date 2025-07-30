@@ -1,4 +1,3 @@
-// src/components/home/ProductsSection/ProductSection.tsx
 import useProducts from "../../../hooks/useProducts";
 import ProductCard from "../Product Card/ProductCard";
 import ProductCardSkeleton from "../Product Card/ProductCardSkeleton";

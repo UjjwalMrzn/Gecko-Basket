@@ -1,4 +1,3 @@
-// src/components/ui/Toast.tsx
 import { useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { CheckCircle, XCircle, Info } from 'lucide-react';
@@ -42,7 +41,6 @@ const ToastItem = ({ message, type, onDismiss }: { message: string, type: string
       text: 'text-red-800',
       icon: <XCircle className="text-red-500" size={20} />,
     },
-    // FIX: Add styles for the 'info' type
     info: {
       bg: 'bg-blue-100',
       border: 'border-blue-400',

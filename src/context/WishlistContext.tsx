@@ -1,4 +1,3 @@
-// src/context/WishlistContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Product } from '../types/products';
 import { useToast } from './ToastContext';
@@ -52,7 +51,6 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// This is the correct, centralized hook for the wishlist.
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
   if (context === undefined) {

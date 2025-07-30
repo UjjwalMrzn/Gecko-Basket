@@ -19,7 +19,6 @@ export const createProduct = async (data: FormData, token: string) => {
   return res.data;
 };
 
-// ✅ FIX: This function now correctly accepts either FormData or a plain object for the data payload.
 export const updateProduct = async (id: string, data: FormData | Partial<Product>, token: string) => {
   const res = await axios.put<Product>(`${API_URL}/${id}`, data, {
     headers: { Authorization: `Bearer ${token}` },

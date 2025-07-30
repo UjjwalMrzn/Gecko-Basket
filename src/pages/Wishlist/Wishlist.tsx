@@ -1,9 +1,7 @@
-// src/pages/Wishlist/Wishlist.tsx
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/home/Product Card/ProductCard';
 import Button from '../../components/ui/Button';
 import { Product } from '../../types/products';
-// ✅ FIX: Correctly import the hook from the context file
 import { useWishlist } from '../../context/WishlistContext';
 
 const WishlistPage = () => {
@@ -26,7 +24,6 @@ const WishlistPage = () => {
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold text-center mb-10">My Wishlist</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {/* ✅ FIX: Add explicit type for 'product' to prevent TS errors */}
           {wishlist.map((product: Product) => (
             <ProductCard key={product._id} product={product} />
           ))}

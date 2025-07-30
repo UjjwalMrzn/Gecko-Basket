@@ -7,7 +7,6 @@ import mapMarkerIcon from '@iconify/icons-fa6-solid/location-dot';
 import phoneIcon from '@iconify/icons-fa6-solid/phone';
 import mailIcon from '@iconify/icons-fa6-solid/envelope';
 
-// ✅ DATA is clean and easy to update.
 const socialLinks = [
   { href: 'https://www.facebook.com/profile.php?id=61576932395282', icon: facebookIcon, label: 'Facebook' },
   { href: 'https://www.instagram.com/geckobasket/', icon: instagramIcon, label: 'Instagram' },

@@ -1,4 +1,3 @@
-// src/components/home/ProductCard/ProductCardSkeleton.tsx
 const ProductCardSkeleton = () => {
   return (
     <div className="animate-pulse bg-white rounded-xl shadow border border-gray-200 flex flex-col overflow-hidden">

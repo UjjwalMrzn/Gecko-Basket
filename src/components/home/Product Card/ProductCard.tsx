@@ -1,10 +1,8 @@
-// src/components/home/Product Card/ProductCard.tsx
 import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "../../ui/Button";
 import StarRating from "../../ui/StarRating";
 import { Product } from "../../../types/products";
-// ✅ FIX: Correctly import the hooks from the context files
 import { useCart } from "../../../context/CartContext";
 import { useWishlist } from "../../../context/WishlistContext";
 
@@ -29,6 +27,7 @@ const ProductCard = ({ product }: Props) => {
     <Link
       to={`/product/${product._id}`}
       className="group relative bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all flex flex-col overflow-hidden font-inter"
+      data-testid={`product-card-${product._id}`}
     >
       <div className="relative bg-gray-50 aspect-[4/3] overflow-hidden">
         <img
@@ -43,6 +42,7 @@ const ProductCard = ({ product }: Props) => {
           }}
           className="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition z-10"
           title="Add to Wishlist"
+          data-testid={`product-card-wishlist-button-${product._id}`}
         >
           <Heart size={18} className={`transition-colors ${isInWishlist(product._id) ? 'text-red-500 fill-red-500' : 'text-gray-700'}`} />
         </button>
@@ -86,6 +86,7 @@ const ProductCard = ({ product }: Props) => {
             }}
             fullWidth
             icon={<ShoppingCart size={16} />}
+            testId={`product-card-add-to-cart-button-${product._id}`}
           >
             Add to Cart
           </Button>

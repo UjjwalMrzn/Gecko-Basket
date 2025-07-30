@@ -1,5 +1,5 @@
 import { ShoppingCart, Heart } from 'lucide-react';
-import StarRating from '../../components/StarRating/StarRating';
+import StarRating from '../../components/ui/StarRating';
 const products = [
   {
     id: 1,
@@ -8,7 +8,7 @@ const products = [
     description: "High-protein, nutritious roasted gram flour, perfect for traditional drinks and recipes.",
     price: 1299,
     originalPrice: 1599, // Added for sale comparison
-    image: "/products/sattu.jpg", // Assuming a more relevant image
+    image: "/products/sattu.jpg",
     rating: 4.5,
     reviews: 117,
     tag: "Sale", // Dynamic badge
@@ -19,7 +19,7 @@ const products = [
     category: "Merchandise",
     description: "Start your day with a dose of code and coffee in this sturdy ceramic mug.",
     price: 699,
-    originalPrice: null, // No sale on this item
+    originalPrice: null, 
     image: "/products/mug.jpg",
     rating: 5,
     reviews: 210,
@@ -35,7 +35,7 @@ const products = [
     image: "/products/stickers.jpg",
     rating: 4.8,
     reviews: 92,
-    tag: null, // No badge on this item
+    tag: null,
   },
 ];
 

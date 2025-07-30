@@ -1,4 +1,3 @@
-// src/components/admin/Sidebar.tsx
 import { NavLink } from "react-router-dom";
 import Logo from "../../assets/logos/GeckoBasketLogo.png";
 import { LayoutDashboard, Package, ShoppingBag, Users, LogOut, X } from "lucide-react";
@@ -17,7 +16,7 @@ type Props = {
 };
 
 const SidebarContent = ({ onClose }: { onClose: () => void }) => {
-  const { logout } = useAuth();
+  const { logout } = useAuth(); // Get the logout function from our context
   return (
     <div className="flex flex-col h-full bg-white border-r">
       <div className="flex items-center justify-between h-20 px-6 border-b">
@@ -54,12 +53,9 @@ const SidebarContent = ({ onClose }: { onClose: () => void }) => {
 const Sidebar = ({ isMobileOpen, onClose }: Props) => {
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="hidden lg:block fixed top-0 left-0 z-20 h-full w-64">
         <SidebarContent onClose={() => {}} />
       </aside>
-
-      {/* Mobile Sidebar Overlay */}
       {isMobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40">
           <div className="fixed inset-0 bg-black/30" onClick={onClose}></div>

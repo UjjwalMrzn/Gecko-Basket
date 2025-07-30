@@ -1,16 +1,15 @@
-// src/context/AuthContext.tsx
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { User } from "../types/user"; // Import the centralized User type
+import { User } from "../types/user";
 
-type AuthContextType = {
+interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
   token: string | null;
   authIsLoading: boolean;
   login: (user: User, token: string) => void;
   logout: () => void;
-};
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -22,8 +21,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
-      const savedToken = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user");
+      const savedToken = localStorage.getItem("gecko-token");
+      const savedUser = localStorage.getItem("gecko-user");
       if (savedToken && savedUser) {
         setUser(JSON.parse(savedUser));
         setToken(savedToken);
@@ -35,9 +34,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (userData: User, tokenData: string) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", tokenData);
+  const login = useCallback((userData: User, tokenData: string) => {
+    localStorage.setItem("gecko-user", JSON.stringify(userData));
+    localStorage.setItem("gecko-token", tokenData);
     setUser(userData);
     setToken(tokenData);
     if (userData.role === 'admin') {
@@ -45,15 +44,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else {
       navigate("/");
     }
-  };
+  }, [navigate]);
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+  const logout = useCallback(() => {
+    localStorage.removeItem("gecko-user");
+    localStorage.removeItem("gecko-token");
     setUser(null);
     setToken(null);
-    navigate("/");
-  };
+    navigate("/auth"); // Redirect to a login/auth page
+  }, [navigate]);
 
   return (
     <AuthContext.Provider
@@ -73,8 +72,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };

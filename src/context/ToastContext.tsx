@@ -1,7 +1,5 @@
-// src/context/ToastContext.tsx
 import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
-// FIX: Add 'info' as an allowed toast type
 export type ToastType = 'success' | 'error' | 'info';
 
 interface ToastMessage {

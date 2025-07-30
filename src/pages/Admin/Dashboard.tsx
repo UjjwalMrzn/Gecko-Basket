@@ -1,10 +1,9 @@
-// src/pages/Admin/Dashboard.tsx
 import { useEffect, useState } from "react";
 import { Package, ShoppingBag, Users, DollarSign } from "lucide-react";
 import Skeleton from "../../components/ui/Skeleton";
 import { useAuth } from "../../context/AuthContext";
 import { fetchAllProducts } from "../../api/productsApi";
-import { fetchAllOrders } from "../../api/orderApi";
+import { fetchAllOrders } from "../../api/orderApi"; 
 import { fetchAllUsers } from "../../api/adminApi";
 
 interface Stats {
@@ -37,8 +36,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!token) return;
-
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const [productsRes, ordersRes, usersRes] = await Promise.all([
@@ -50,7 +51,6 @@ const Dashboard = () => {
         const totalRevenue = ordersRes.data.reduce((acc: number, order: any) => acc + order.totalPrice, 0);
 
         setStats({
-          // This now works correctly because fetchAllProducts returns the full response
           products: productsRes.data.length,
           orders: ordersRes.data.length,
           users: usersRes.data.length,

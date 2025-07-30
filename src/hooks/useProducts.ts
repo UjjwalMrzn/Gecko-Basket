@@ -1,7 +1,6 @@
-// src/hooks/useProducts.ts
 import { useState, useEffect } from "react";
 import { Product } from "../types/products";
-import { fetchAllProducts } from "../api/productsApi"; // Import the updated function
+import { fetchAllProducts } from "../api/productsApi";
 
 const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -10,15 +9,12 @@ const useProducts = () => {
 
   useEffect(() => {
     const getProducts = async () => {
-      setLoading(true);
-      setError(null);
       try {
-        // Now we get the full response and use .data
+        setLoading(true);
         const response = await fetchAllProducts();
         setProducts(response.data);
-      } catch (err: unknown) {
-        setError("Failed to fetch products.");
-        console.error(err);
+      } catch (err) {
+        setError("Failed to fetch products. Please try again later.");
       } finally {
         setLoading(false);
       }

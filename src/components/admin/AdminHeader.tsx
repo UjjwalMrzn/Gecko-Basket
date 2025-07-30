@@ -1,4 +1,3 @@
-// src/components/admin/AdminHeader.tsx
 import { Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 

@@ -1,4 +1,3 @@
-// src/hooks/useWishlist.ts
 import { useWishlist as useWishlistContext } from '../context/WishlistContext';
 
 const useWishlist = () => {

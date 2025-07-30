@@ -1,4 +1,3 @@
-// src/context/CartContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Product } from '../types/products';
 import { useToast } from './ToastContext';
@@ -74,7 +73,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// This is the correct, centralized hook for the cart.
 export const useCart = () => {
   const context = useContext(CartContext);
   if (context === undefined) {

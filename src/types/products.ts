@@ -1,4 +1,3 @@
-// src/types/products.ts
 
 export interface Product {
   _id: string; // The database ID from MongoDB
@@ -7,10 +6,10 @@ export interface Product {
   category: string;
   description: string;
   price: number;
-  originalPrice?: number; // Optional, for items not on sale
+  originalPrice?: number; 
   image: string;
   rating: number;
-  numReviews: number; // Corrected from 'reviews' to match backend
+  numReviews: number;
   tag?: string;
   brand: string;
   countInStock: number;

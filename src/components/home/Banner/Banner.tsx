@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'; // ✅ IMPORT Link
+import { Link } from 'react-router-dom';
 import Slider, { Settings } from "react-slick";
 import { MoveRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { bannerData, BannerSlide } from "../../../data/bannerData";
@@ -64,7 +64,6 @@ const Banner: React.FC = () => {
                     {slide.title}
                   </h3>
                   
-                  {/* ✅ The button is now wrapped in a Link */}
                   <Link to={slide.link}>
                     <button
                       className={`${slide.buttonColor} w-36 md:w-40 h-11 md:h-12 rounded-lg text-white flex items-center justify-center gap-2 capitalize mx-auto md:mx-0 transition hover:scale-[1.03] shadow-md`}

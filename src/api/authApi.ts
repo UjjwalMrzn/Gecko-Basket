@@ -25,8 +25,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
   try {
     const response = await axios.post<LoginResponse>(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, credentials);
     return response.data;
-  } catch (error: any) { // ✅ FIX: Type error as 'any' to inspect its properties
-    // ✅ FIX: Check for the response property directly instead of using isAxiosError
+  } catch (error: any) {
     if (error.response && error.response.data && error.response.data.message) {
       // Re-throw the specific error message from the backend
       throw new Error(error.response.data.message);
@@ -41,8 +40,7 @@ export const registerUser = async (userData: RegisterData): Promise<{ message: s
   try {
     const response = await axios.post<{ message: string }>(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, userData);
     return response.data;
-  } catch (error: any) { // ✅ FIX: Type error as 'any'
-    // ✅ FIX: Check for the response property directly
+  } catch (error: any) {
     if (error.response && error.response.data && error.response.data.message) {
       throw new Error(error.response.data.message);
     }

@@ -9,7 +9,7 @@ type Props = {
 const Modal = ({ isOpen, onClose, children }: Props) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"; // disable scroll
+      document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }

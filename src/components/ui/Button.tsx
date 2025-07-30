@@ -1,4 +1,3 @@
-// src/components/ui/Button.tsx
 import React from 'react';
 
 type ButtonVariant = 'solid' | 'outline';
@@ -6,7 +5,6 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 
 type Props = {
   children: React.ReactNode;
-  // Corrected onClick type to accept the React MouseEvent
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
   fullWidth?: boolean;
@@ -15,6 +13,7 @@ type Props = {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: React.ReactNode;
+  testId?: string;
 };
 
 const Button = ({
@@ -27,7 +26,9 @@ const Button = ({
   variant = "solid",
   size = "md",
   icon,
+  testId, 
 }: Props) => {
+  
   const baseStyles = "inline-flex items-center justify-center gap-2 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200";
   const sizeStyles = {
     sm: 'px-3 py-2 text-xs',
@@ -44,7 +45,14 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      data-testid={testId} 
+      className={`
+        ${baseStyles}
+        ${sizeStyles[size]}
+        ${variantStyles[variant]}
+        ${fullWidth ? "w-full" : ""}
+        ${className}
+      `}
     >
       {icon}
       {children}

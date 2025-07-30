@@ -1,4 +1,3 @@
-// src/components/shared/Navbar/NavBar.tsx
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -9,7 +8,6 @@ import UserMenu from "../UserMenu/UserMenu";
 import SearchBar from "../SearchBar/SearchBar";
 import CategoriesDropDown from "../CategoriesDropDown/CategoriesDropDown";
 import { useAuth } from "../../../context/AuthContext";
-// ✅ FIX: Correctly import the hooks from the context files
 import { useCart, CartItem } from "../../../context/CartContext";
 import { useWishlist } from "../../../context/WishlistContext";
 
@@ -41,7 +39,7 @@ const Navbar = () => {
             <img src={Logo} alt="Gecko Basket Logo" className="h-10 sm:h-12 w-auto" />
           </Link>
           <div className="hidden lg:flex flex-1 justify-center px-8">
-            <SearchBar onSubmit={(q) => console.log(q)} />
+            <SearchBar onSubmit={(query: string) => console.log(query)} />
           </div>
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="hidden sm:flex items-center gap-4">
@@ -84,7 +82,7 @@ const Navbar = () => {
               </button>
             </div>
             <div className="p-4 space-y-4">
-              <SearchBar onSubmit={(q) => console.log(q)} />
+              <SearchBar onSubmit={(query: string) => console.log(query)} />
               <nav className="flex flex-col gap-1">
                 {navLinks.map(({ to, label }) => (
                   <NavLink key={to} to={to} onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `block px-4 py-3 rounded-lg text-base font-medium ${isActive ? "bg-green-50 text-[#59b143]" : "text-gray-700 hover:bg-gray-100"}`}>

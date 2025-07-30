@@ -1,4 +1,3 @@
-// This file centralizes the data for the homepage banner, making it easy to update.
 
 export interface BannerSlide {
   id: number;
@@ -7,7 +6,7 @@ export interface BannerSlide {
   image: string;
   bgColor: string;
   buttonColor: string;
-  link: string; // ✅ ADDED: The URL link for the "Shop Now" button
+  link: string;
 }
 
 export const bannerData: BannerSlide[] = [
@@ -18,7 +17,6 @@ export const bannerData: BannerSlide[] = [
     image: "/banners/sattu.png",
     bgColor: "bg-gradient-to-r from-amber-100 to-amber-50",
     buttonColor: "bg-amber-500 hover:bg-amber-600",
-    // Example using a real Product ID from your database
     link: "/product/6874f486954bd4c22d7b74a1", 
   },
   {
@@ -28,7 +26,7 @@ export const bannerData: BannerSlide[] = [
     image: "/banners/furniture.png",
     bgColor: "bg-gradient-to-r from-blue-50 to-indigo-50",
     buttonColor: "bg-indigo-500 hover:bg-indigo-600",
-    link: "/shop", // Fallback to the general shop page
+    link: "/shop",
   },
   {
     id: 3,
@@ -37,7 +35,7 @@ export const bannerData: BannerSlide[] = [
     image: "/banners/gym.png",
     bgColor: "bg-gradient-to-r from-green-50 to-teal-50",
     buttonColor: "bg-teal-500 hover:bg-teal-600",
-    link: "/shop", // Fallback to the general shop page
+    link: "/shop",
   },
   {
     id: 4,
@@ -46,6 +44,6 @@ export const bannerData: BannerSlide[] = [
     image: "/banners/home-essentials.png",
     bgColor: "bg-gradient-to-r from-purple-50 to-pink-50",
     buttonColor: "bg-purple-500 hover:bg-purple-600",
-    link: "/shop", // Fallback to the general shop page
+    link: "/shop",
   },
 ];
