@@ -3,7 +3,7 @@ import { Package, ShoppingBag, Users, DollarSign } from "lucide-react";
 import Skeleton from "../../components/ui/Skeleton";
 import { useAuth } from "../../context/AuthContext";
 import { fetchAllProducts } from "../../api/productsApi";
-import { fetchAllOrders } from "../../api/orderApi"; 
+import { fetchAllOrders } from "../../api/orderApi";
 import { fetchAllUsers } from "../../api/adminApi";
 
 interface Stats {
@@ -40,14 +40,17 @@ const Dashboard = () => {
         setLoading(false);
         return;
       }
+
       try {
         setLoading(true);
+        // Fetch all data in parallel for efficiency
         const [productsRes, ordersRes, usersRes] = await Promise.all([
           fetchAllProducts(),
           fetchAllOrders(token),
           fetchAllUsers(token)
         ]);
         
+        // Calculate total revenue from orders
         const totalRevenue = ordersRes.data.reduce((acc: number, order: any) => acc + order.totalPrice, 0);
 
         setStats({

@@ -22,8 +22,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       const localData = localStorage.getItem('gecko-cart');
-      return localData ? JSON.parse(localData) : [];
+      if (!localData) return [];
+      
+      const parsedData = JSON.parse(localData);
+      if (Array.isArray(parsedData)) {
+        return parsedData.filter(item => item.product && typeof item.quantity === 'number');
+      }
+      return [];
     } catch (error) {
+      console.error("Failed to parse cart from localStorage", error);
       return [];
     }
   });

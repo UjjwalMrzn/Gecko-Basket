@@ -26,7 +26,7 @@ const Button = ({
   variant = "solid",
   size = "md",
   icon,
-  testId, 
+  testId,
 }: Props) => {
   
   const baseStyles = "inline-flex items-center justify-center gap-2 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200";
@@ -45,7 +45,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      data-testid={testId} 
+      data-testid={testId}
       className={`
         ${baseStyles}
         ${sizeStyles[size]}

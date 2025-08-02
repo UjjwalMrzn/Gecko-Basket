@@ -23,6 +23,7 @@
     "tabler-icons-react": "^1.56.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/node": "^24.0.4",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

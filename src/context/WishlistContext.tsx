@@ -16,8 +16,16 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const [wishlist, setWishlist] = useState<Product[]>(() => {
     try {
       const localData = localStorage.getItem('gecko-wishlist');
-      return localData ? JSON.parse(localData) : [];
+      if (!localData) return [];
+
+      const parsedData = JSON.parse(localData);
+      if (Array.isArray(parsedData)) {
+        // Ensure that the loaded items are valid products
+        return parsedData.filter(item => item && item._id);
+      }
+      return [];
     } catch (error) {
+      console.error("Failed to parse wishlist from localStorage", error);
       return [];
     }
   });
@@ -26,14 +34,15 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('gecko-wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const isInWishlist = useCallback((productId: string) => {
+  const isInWishlist = useCallback((productId: string): boolean => {
     return wishlist.some(p => p._id === productId);
   }, [wishlist]);
 
   const removeFromWishlist = useCallback((productId: string) => {
+    const productName = wishlist.find(p => p._id === productId)?.name || 'Item';
     setWishlist(prev => prev.filter(p => p._id !== productId));
-    addToast('Item removed from wishlist', 'info');
-  }, [addToast]);
+    addToast(`${productName} removed from wishlist`, 'info');
+  }, [addToast, wishlist]);
 
   const addToWishlist = useCallback((product: Product) => {
     if (isInWishlist(product._id)) {
