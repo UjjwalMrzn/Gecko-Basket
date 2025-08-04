@@ -1,6 +1,6 @@
+// src/routes/AppRoutes.tsx
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
-// Layouts
 import MainLayout from "../Layout/MainLayout/MainLayout";
 import AdminLayout from "../Layout/AdminLayout/AdminLayout";
 
@@ -11,6 +11,11 @@ import ProductDetail from "../pages/Product/ProductDetail";
 import Error from "../pages/Error/Error";
 import WishlistPage from "../pages/Wishlist/Wishlist";
 import CartPage from "../pages/Cart/CartPage";
+import SearchPage from "../pages/Search/SearchPage";
+import AccountPage from "../pages/Account/AccountPage";
+import MyOrdersPage from "../pages/Account/MyOrderPage";
+import CheckoutPage from "../pages/Checkout/CheckoutPage";
+import OrderConfirmationPage from "../pages/Checkout/OrderConfirmationPage"; // Import the new page
 
 // Admin Pages
 import Dashboard from "../pages/Admin/Dashboard";
@@ -29,6 +34,17 @@ const AppRoutes = () => {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        
+        {/* Protected Customer Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/account/my-orders" element={<MyOrdersPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          {/* Add the new route for the confirmation page */}
+          <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+        </Route>
+
         <Route path="*" element={<Error />} />
       </Route>
 

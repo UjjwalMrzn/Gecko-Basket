@@ -1,14 +1,16 @@
-// src/pages/Checkout/CheckoutPage.tsx
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useCart } from '../../context/CartContext';
+import { useCart, CartItem } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../context/ToastContext';
+import { createOrder } from '../../api/orderApi';
+import { Order } from '../../types/order';
+import axios from 'axios';
 
 const CheckoutPage = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { cartItems, clearCart } = useCart();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -20,36 +22,80 @@ const CheckoutPage = () => {
     postalCode: '',
     country: 'Nepal',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
-  const shippingCost = 100; // Example shipping cost
-  const total = subtotal + shippingCost;
+  useEffect(() => {
+    if (cartItems.length === 0 && !isSubmitting) {
+      navigate('/cart');
+    }
+  }, [cartItems, navigate, isSubmitting]);
+
+  const subtotal = cartItems.reduce((acc: number, item: CartItem) => acc + item.product.price * item.quantity, 0);
+  const shippingCost = 100;
+  const tax = 0;
+  const total = subtotal + shippingCost + tax;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setShippingInfo(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // In the future, this will call the API to create an order.
-    addToast("Order placement is for UI demonstration only for now.", "info");
-    clearCart(); // Clear the cart after "placing" the order
-    navigate('/account/my-orders'); // Redirect to order history
+    if (!token) {
+      addToast("You must be logged in to place an order.", "error");
+      return;
+    }
+    setIsSubmitting(true);
+
+    const orderData = {
+      orderItems: cartItems.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        image: item.product.image,
+        price: item.product.price,
+        product: item.product._id,
+      })),
+      shippingAddress: {
+        address: shippingInfo.address,
+        city: shippingInfo.city,
+        postalCode: shippingInfo.postalCode,
+        country: shippingInfo.country,
+      },
+      paymentMethod: 'Cash on Delivery',
+      itemsPrice: subtotal,
+      taxPrice: tax,
+      shippingPrice: shippingCost,
+      totalPrice: total,
+    };
+
+    try {
+      const response = await createOrder(orderData, token);
+      const newOrder: Order = response.data;
+      addToast("Order placed successfully!", "success");
+      clearCart();
+      navigate(`/order-confirmation/${newOrder._id}`);
+    } catch (error: unknown) {
+      let errorMessage = "Failed to place order. Please try again.";
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        if (axiosError.response?.data?.message) {
+            errorMessage = axiosError.response.data.message;
+        }
+      }
+      addToast(errorMessage, "error");
+      console.error("Order placement failed:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
-  if (cartItems.length === 0) {
-    navigate('/cart');
-    return null; // Redirect if cart is empty
-  }
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-center mb-10">Checkout</h1>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          {/* Shipping Details */}
           <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-xl shadow-sm border">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Shipping Information</h2>
             <div className="space-y-4">
@@ -63,8 +109,7 @@ const CheckoutPage = () => {
             </div>
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border">
+          <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border sticky top-24">
             <h2 className="text-lg font-bold text-gray-900 border-b pb-4">Order Summary</h2>
             <div className="mt-4 space-y-2 text-sm text-gray-600">
               {cartItems.map(item => (
@@ -88,7 +133,9 @@ const CheckoutPage = () => {
               <p>Total</p>
               <p>Rs. {total.toLocaleString()}</p>
             </div>
-            <Button type="submit" fullWidth className="mt-6" testId="place-order-button">Place Order</Button>
+            <Button type="submit" fullWidth className="mt-6" testId="place-order-button" disabled={isSubmitting}>
+              {isSubmitting ? 'Placing Order...' : 'Place Order'}
+            </Button>
           </div>
         </form>
       </div>

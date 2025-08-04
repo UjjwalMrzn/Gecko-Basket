@@ -1,3 +1,4 @@
+// src/api/orderApi.ts
 import axios from "axios";
 import { Order } from "../types/order";
 
@@ -10,9 +11,16 @@ export const fetchAllOrders = (token: string) => {
   });
 };
 
-// Fetches orders for the currently logged-in user (for the account page)
+// Fetches orders for the currently logged-in user
 export const fetchMyOrders = (token: string) => {
   return axios.get<Order[]>(`${API_URL}/myorders`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+};
+
+// ✅ FIX: The new function to create an order
+export const createOrder = (orderData: any, token: string) => {
+  return axios.post<Order>(API_URL, orderData, {
     headers: { Authorization: `Bearer ${token}` },
   });
 };

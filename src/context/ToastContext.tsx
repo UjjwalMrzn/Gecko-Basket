@@ -1,6 +1,8 @@
+// src/context/ToastContext.tsx
 import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
-export type ToastType = 'success' | 'error' | 'info';
+// ✅ FIX: Add 'warning' as an allowed toast type
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface ToastMessage {
   id: number;

@@ -10,6 +10,7 @@ import RegisterModal from "./components/shared/AuthModal/RegisterModal";
 import ScrollToTop from "./components/shared/ScrollToTop/ScrollToTop";
 import AppRoutes from "./routes/AppRoutes";
 import { ToastProvider } from "./context/ToastContext";
+import Toast from "./components/ui/Toast";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
                 <ScrollToTop />
                 <LoginModal />
                 <RegisterModal />
+                <Toast />
                 <AppRoutes />
               </WishlistProvider>
             </CartProvider>

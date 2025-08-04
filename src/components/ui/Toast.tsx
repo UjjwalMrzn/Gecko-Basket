@@ -1,6 +1,21 @@
+// src/components/ui/Toast.tsx
 import { useEffect } from 'react';
-import { useToast } from '../../context/ToastContext';
-import { CheckCircle, XCircle, Info } from 'lucide-react';
+import { useToast, ToastType } from '../../context/ToastContext';
+import { CheckCircle, XCircle, Info, ShieldAlert } from 'lucide-react';
+
+const icons: { [key in ToastType]: React.ReactNode } = {
+  success: <CheckCircle className="text-green-500" size={20} />,
+  error: <XCircle className="text-red-500" size={20} />,
+  info: <Info className="text-blue-500" size={20} />,
+  warning: <ShieldAlert className="text-yellow-500" size={20} />,
+};
+
+const styles: { [key in ToastType]: string } = {
+  success: 'bg-green-100 border-green-400 text-green-800',
+  error: 'bg-red-100 border-red-400 text-red-800',
+  info: 'bg-blue-100 border-blue-400 text-blue-800',
+  warning: 'bg-yellow-100 border-yellow-400 text-yellow-800',
+};
 
 const Toast = () => {
   const { toasts, removeToast } = useToast();
@@ -18,43 +33,19 @@ const Toast = () => {
   );
 };
 
-// Individual toast item component
-const ToastItem = ({ message, type, onDismiss }: { message: string, type: string, onDismiss: () => void }) => {
+const ToastItem = ({ message, type, onDismiss }: { message: string, type: ToastType, onDismiss: () => void }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onDismiss();
-    }, 4000); // Auto-dismiss after 4 seconds
+    }, 5000); // Auto-dismiss after 5 seconds
 
     return () => clearTimeout(timer);
   }, [onDismiss]);
 
-  const typeStyles = {
-    success: {
-      bg: 'bg-green-100',
-      border: 'border-green-400',
-      text: 'text-green-800',
-      icon: <CheckCircle className="text-green-500" size={20} />,
-    },
-    error: {
-      bg: 'bg-red-100',
-      border: 'border-red-400',
-      text: 'text-red-800',
-      icon: <XCircle className="text-red-500" size={20} />,
-    },
-    info: {
-      bg: 'bg-blue-100',
-      border: 'border-blue-400',
-      text: 'text-blue-800',
-      icon: <Info className="text-blue-500" size={20} />,
-    },
-  };
-
-  const styles = typeStyles[type as keyof typeof typeStyles] || typeStyles.info;
-
   return (
-    <div className={`flex items-center gap-4 w-full max-w-xs p-4 rounded-lg shadow-lg border-l-4 ${styles.bg} ${styles.border}`} role="alert">
-      {styles.icon}
-      <div className={`text-sm font-medium ${styles.text}`}>
+    <div className={`flex items-center gap-4 w-full max-w-xs p-4 rounded-lg shadow-lg border-l-4 ${styles[type]}`} role="alert">
+      {icons[type]}
+      <div className="text-sm font-medium">
         {message}
       </div>
       <button onClick={onDismiss} className="ml-auto -mx-1.5 -my-1.5 p-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 inline-flex h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100">
