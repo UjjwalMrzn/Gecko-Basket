@@ -1,10 +1,14 @@
+// src/pages/Admin/Dashboard.tsx
+
 import { useEffect, useState } from "react";
 import { Package, ShoppingBag, Users, DollarSign } from "lucide-react";
 import Skeleton from "../../components/ui/Skeleton";
 import { useAuth } from "../../context/AuthContext";
 import { fetchAllProducts } from "../../api/productsApi";
-import { fetchAllOrders } from "../../api/orderApi";
+// FIX: Import the correctly named function 'adminGetAllOrders'
+import { adminGetAllOrders } from "../../api/orderApi";
 import { fetchAllUsers } from "../../api/adminApi";
+import { Order } from "../../types/order"; // Import Order type for calculation
 
 interface Stats {
   products: number;
@@ -46,12 +50,13 @@ const Dashboard = () => {
         // Fetch all data in parallel for efficiency
         const [productsRes, ordersRes, usersRes] = await Promise.all([
           fetchAllProducts(),
-          fetchAllOrders(token),
+          // FIX: Call the correctly named function 'adminGetAllOrders'
+          adminGetAllOrders(token),
           fetchAllUsers(token)
         ]);
         
         // Calculate total revenue from orders
-        const totalRevenue = ordersRes.data.reduce((acc: number, order: any) => acc + order.totalPrice, 0);
+        const totalRevenue = ordersRes.data.reduce((acc: number, order: Order) => acc + order.totalPrice, 0);
 
         setStats({
           products: productsRes.data.length,

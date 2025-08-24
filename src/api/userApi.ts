@@ -1,17 +1,30 @@
+// src/api/userApi.ts
+
 import axios from "axios";
+import { User } from "../types/user";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
-// This function will be used to update the user's name.
-export const updateUserProfile = (name: string, token: string) => {
-  return axios.put(`${API_URL}/profile`, { name }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+// FIX: Update this function to accept a data object instead of just a name string
+export const updateUserProfile = async (data: { name: string; gender?: string; birthday?: string }, token: string) => {
+  const response = await axios.put<User>(
+    `${API_URL}/profile`, 
+    data, // Send the entire data object
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
 };
 
-// This function will be used to change the user's password.
-export const changeUserPassword = (passwords: object, token: string) => {
-  return axios.put(`${API_URL}/change-password`, passwords, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+// This function for changing password remains the same
+export const changeUserPassword = async (passwords: object, token: string) => {
+  const response = await axios.put(
+    `${API_URL}/change-password`, 
+    passwords, 
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
 };

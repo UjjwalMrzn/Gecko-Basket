@@ -1,18 +1,36 @@
-import { Navigate, Outlet } from "react-router-dom";
+// src/routes/ProtectedRoute.tsx
+
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Loader from "../components/ui/Loader";
 
-const ProtectedRoute = () => {
-  const { user, authIsLoading } = useAuth(); // 1. Get the loading state
+const ProtectedRoute = ({ adminOnly = false }: { adminOnly?: boolean }) => {
+  const { user, isLoggedIn, authIsLoading } = useAuth();
+  const location = useLocation();
 
-  // 2. If the auth state is still loading, render a loading message (or a spinner)
   if (authIsLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader />
+      </div>
+    );
   }
 
-  // 3. Once loading is false, perform the check
-  const isAdmin = user && user.role === 'admin';
+  // If trying to access a protected route and not logged in
+  if (!isLoggedIn) {
+    // If it's an admin page, send to admin login.
+    // Otherwise, redirecting to home is a safe fallback (the login modal will handle user login).
+    const redirectTo = adminOnly ? "/admin/login" : "/";
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
 
-  return isAdmin ? <Outlet /> : <Navigate to="/" replace />;
+  // If it's an admin-only route and the logged-in user is NOT an admin
+  if (adminOnly && user?.role !== 'admin') {
+    return <Navigate to="/" replace />; // Kick out non-admins to the homepage
+  }
+
+  // If all checks pass, show the page
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -1,7 +1,8 @@
+// src/types/products.ts
 
 export interface Product {
-  _id: string; // The database ID from MongoDB
-  id: string; // Keep this if you use it for other frontend logic
+  _id: string;
+  id: string; 
   name: string;
   category: string;
   description: string;
@@ -10,7 +11,8 @@ export interface Product {
   image: string;
   rating: number;
   numReviews: number;
-  tag?: string;
   brand: string;
   countInStock: number;
+  isFeatured?: boolean;
+  tags?: string[]; // The official type is an array of strings
 }

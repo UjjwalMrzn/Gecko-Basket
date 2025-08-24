@@ -1,3 +1,5 @@
+// src/components/shared/UserMenu/UserMenu.tsx
+
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { User, ChevronDown } from "lucide-react";

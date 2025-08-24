@@ -1,4 +1,4 @@
-// src/hooks/useProducts.ts
+// src/hooks/useFilteredProducts.ts
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -12,7 +12,7 @@ export interface ProductFilters {
   sort?: string;
 }
 
-const useProducts = (filters: ProductFilters = {}) => {
+const useFilteredProducts = (filters: ProductFilters = {}) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,4 +59,4 @@ const useProducts = (filters: ProductFilters = {}) => {
   return { products, loading, error };
 };
 
-export default useProducts;
+export default useFilteredProducts;

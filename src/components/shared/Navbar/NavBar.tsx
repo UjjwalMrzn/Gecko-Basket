@@ -17,7 +17,7 @@ const Navbar = () => {
   const { wishlist } = useWishlist();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const categories = ["Food & Beverages", "Electronic Devices & Accessories", "Home & Kitchen"];
+  const categories = ["Groceries", "Electronics", "Health & Wellness"];
   const totalCartQuantity = cartItems.reduce((total: number, item: CartItem) => total + item.quantity, 0);
 
   const navLinks = [

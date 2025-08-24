@@ -1,60 +1,78 @@
-import { useState, useRef } from "react";
-import { Menu } from "lucide-react";
+// src/components/shared/CategoriesDropDown/CategoriesDropDown.tsx
+import { useState, useRef, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronDown, LayoutGrid } from "lucide-react";
 
 type Props = {
   items: string[];
-  onSelect?: (value: string) => void;
 };
 
-const CategoriesDropDown = ({ items, onSelect }: Props) => {
+const CategoriesDropDown = ({ items }: Props) => {
   const [open, setOpen] = useState(false);
-  const closeTimeout = useRef<NodeJS.Timeout | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
-  const handleMouseEnter = () => {
-    if (closeTimeout.current) clearTimeout(closeTimeout.current);
-    setOpen(true);
-  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const handleMouseLeave = () => {
-    closeTimeout.current = setTimeout(() => setOpen(false), 150);
+  // Close dropdown on any route change
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname, location.search]);
+
+  // Helper function to create a URL-friendly slug from a category name
+  const createCategorySlug = (categoryName: string) => {
+    return categoryName.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
   };
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Trigger: icon + label */}
-      <div
-        className={`flex items-center gap-2 text-sm font-medium capitalize cursor-pointer transition-colors ${
-          open ? "text-[#59b143]" : "text-gray-700 hover:text-[#59b143]"
-        }`}
+    <div ref={dropdownRef} className="relative">
+      <button
+        onClick={() => setOpen(prev => !prev)}
+        className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#59b143] transition-colors"
+        data-testid="categories-dropdown-button"
       >
-        <Menu size={18} className="transition-colors" />
-        <button
-          type="button"
-          className="focus:outline-none"
-          aria-haspopup="true"
-          aria-expanded={open}
-        >
-          All Categories
-        </button>
-      </div>
+        <LayoutGrid size={16} />
+        <span>All Categories</span>
+        <ChevronDown size={16} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
 
-      {/* Dropdown */}
       {open && (
-        <ul className="absolute left-0 top-full mt-1 w-56 bg-white border text-gray-700 border-gray-200 rounded-md shadow-lg py-1 text-sm z-20">
-          {items.map((category) => (
-            <li
-              key={category}
-              className="px-4 py-2 hover:bg-[#59b143] hover:text-white cursor-pointer"
-              onClick={() => onSelect?.(category)}
-            >
-              {category}
+        <div 
+          className="absolute left-0 top-full mt-2 w-64 bg-white border rounded-xl shadow-lg z-20 py-2 font-inter text-sm"
+          data-testid="categories-dropdown-menu"
+        >
+          <ul>
+            <li>
+              <Link
+                to="/shop"
+                className="block px-4 py-2.5 font-semibold text-gray-800 hover:bg-gray-100 hover:text-[#59b143] transition-colors"
+                data-testid="category-link-all"
+              >
+                All Products
+              </Link>
             </li>
-          ))}
-        </ul>
+            <hr className="my-1"/>
+            {items.map((item) => (
+              <li key={item}>
+                <Link
+                  to={`/shop?category=${createCategorySlug(item)}`}
+                  className="block px-4 py-2.5 text-gray-700 hover:bg-gray-100 hover:text-[#59b143] transition-colors"
+                  data-testid={`category-link-${createCategorySlug(item)}`}
+                >
+                  {item}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

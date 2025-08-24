@@ -1,4 +1,6 @@
-import useProducts from "../../../hooks/useProducts";
+// src/components/home/ProductsSection/ProductSection.tsx
+
+import useAllProducts from "../../../hooks/useAllProducts"; // Use the new, simple hook
 import ProductCard from "../Product Card/ProductCard";
 import ProductCardSkeleton from "../Product Card/ProductCardSkeleton";
 import ErrorMessage from "../../ui/ErrorMessage";
@@ -6,7 +8,7 @@ import { Link } from "react-router-dom";
 import Button from "../../ui/Button";
 
 const ProductSection = () => {
-  const { products, loading, error } = useProducts();
+  const { products, loading, error } = useAllProducts();
 
   // Show only the first 4 products as featured
   const featuredProducts = products.slice(0, 4);

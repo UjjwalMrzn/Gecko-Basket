@@ -1,6 +1,8 @@
+// src/pages/Admin/Products.tsx
+
 import { useEffect, useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Pencil, Trash2, ShieldAlert, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, ShieldAlert, Search, ChevronLeft, ChevronRight, Star } from "lucide-react"; // Import the Star icon
 import { Product } from "../../types/products";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -122,7 +124,11 @@ const Products = () => {
             {currentProducts.map((p, index) => (
               <tr key={p._id}>
                 <td className="px-4 py-3 font-medium text-gray-500">{indexOfFirstProduct + index + 1}</td>
-                <td className="px-4 py-3 font-medium text-gray-800">{p.name}</td>
+                <td className="px-4 py-3 font-medium text-gray-800 flex items-center gap-2">
+                  {/* FIX: Add a star icon if the product is featured */}
+                  {p.isFeatured && <Star size={14} className="text-yellow-400 fill-yellow-400" />}
+                  <span>{p.name}</span>
+                </td>
                 <td className="px-4 py-3 text-gray-600">{p.category}</td>
                 <td className="px-4 py-3 text-gray-600">Rs. {p.price}</td>
                 <td className="px-4 py-3">

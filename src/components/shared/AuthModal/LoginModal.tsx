@@ -1,3 +1,5 @@
+// src/components/shared/AuthModal/LoginModal.tsx
+
 import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useAuthModal } from "../../../context/AuthModalContext";
@@ -32,6 +34,12 @@ const LoginModal = () => {
       if (!response.ok) {
         throw new Error(data.message || "Login failed.");
       }
+      
+      // FIX: New logic to block admins from this login form
+      if (data.user?.role === 'admin') {
+        throw new Error("Admin accounts must log in via the admin portal.");
+      }
+      
       login(data.user, data.token);
       closeModal();
     } catch (error: any) {
@@ -46,25 +54,9 @@ const LoginModal = () => {
       <h2 className="text-2xl font-bold text-[#272343] mb-1 text-center">Login</h2>
       <p className="text-sm text-gray-500 mb-6 text-center">Access your Gecko Basket account</p>
       <form onSubmit={handleSubmit} className="space-y-5">
-        <Input
-          label="Email"
-          type="email"
-          value={email}
-          placeholder="you@example.com"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          testId="login-email-input"
-        />
+        <Input label="Email" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
         <div className="relative">
-          <Input
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            placeholder="••••••••"
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            testId="login-password-input"
-          />
+          <Input label="Password" type={showPassword ? "text" : "password"} name="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-[38px] text-gray-400 hover:text-[#59b143]">
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -72,13 +64,13 @@ const LoginModal = () => {
         {formError && (
           <p className="text-sm text-red-600 text-center -mt-2">{formError}</p>
         )}
-        <Button type="submit" fullWidth disabled={isLoading} testId="login-submit-button">
+        <Button type="submit" fullWidth disabled={isLoading}>
           {isLoading ? 'Logging in...' : 'Login'}
         </Button>
       </form>
       <p className="text-center text-sm text-gray-600 mt-6">
         Don’t have an account?{" "}
-        <button type="button" onClick={() => openModal("register")} className="text-[#59b143] hover:underline font-medium" data-testid="go-to-register-button">
+        <button type="button" onClick={() => openModal("register")} className="text-[#59b143] hover:underline font-medium">
           Register
         </button>
       </p>

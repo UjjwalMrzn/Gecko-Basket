@@ -1,8 +1,10 @@
 export interface User {
-  _id: string; // The user ID from the MongoDB database
+  _id: string;
   name: string;
   email: string;
   role: 'user' | 'admin';
   createdAt: string;
   updatedAt: string;
+  birthday?: string;
+  gender?: 'male' | 'female' | 'other';
 }

@@ -1,3 +1,4 @@
+// src/api/productsApi.ts
 import axios from "axios";
 import { Product } from "../types/products";
 
@@ -7,28 +8,41 @@ export const fetchAllProducts = () => {
   return axios.get<Product[]>(API_URL);
 };
 
-export const fetchProductById = async (id: string) => {
-  const res = await axios.get<Product>(`${API_URL}/${id}`);
-  return res.data;
+export const fetchProductById = async (id: string): Promise<Product> => {
+  const { data } = await axios.get<Product>(`${API_URL}/${id}`);
+  return data;
 };
 
-export const createProduct = async (data: FormData, token: string) => {
-  const res = await axios.post<Product>(API_URL, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+export const fetchFeaturedProducts = () => {
+  return axios.get<Product[]>(`${API_URL}/featured`);
 };
 
-export const updateProduct = async (id: string, data: FormData | Partial<Product>, token: string) => {
-  const res = await axios.put<Product>(`${API_URL}/${id}`, data, {
-    headers: { Authorization: `Bearer ${token}` },
+export const createProduct = async (productData: FormData, token: string) => {
+  const response = await axios.post(API_URL, productData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
   });
-  return res.data;
+  return response.data;
+};
+
+export const updateProduct = async (id: string, productData: FormData | Partial<Product>, token: string) => {
+    const isFormData = productData instanceof FormData;
+    const response = await axios.put(`${API_URL}/${id}`, productData, {
+        headers: {
+            "Content-Type": isFormData ? "multipart/form-data" : "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
 };
 
 export const deleteProduct = async (id: string, token: string) => {
-  const res = await axios.delete(`${API_URL}/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.delete(`${API_URL}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
-  return res.data;
+  return response.data;
 };

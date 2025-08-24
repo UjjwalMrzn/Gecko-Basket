@@ -1,3 +1,5 @@
+// src/components/admin/Sidebar.tsx
+
 import { NavLink } from "react-router-dom";
 import Logo from "../../assets/logos/GeckoBasketLogo.png";
 import { LayoutDashboard, Package, ShoppingBag, Users, LogOut, X } from "lucide-react";
@@ -16,7 +18,12 @@ type Props = {
 };
 
 const SidebarContent = ({ onClose }: { onClose: () => void }) => {
-  const { logout } = useAuth(); // Get the logout function from our context
+  const { logout } = useAuth();
+
+  const handleAdminLogout = () => {
+    logout({ fromAdmin: true });
+  };
+
   return (
     <div className="flex flex-col h-full bg-white border-r">
       <div className="flex items-center justify-between h-20 px-6 border-b">
@@ -41,7 +48,7 @@ const SidebarContent = ({ onClose }: { onClose: () => void }) => {
         ))}
       </nav>
       <div className="p-4 border-t">
-        <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all">
+        <button onClick={handleAdminLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all">
           <LogOut size={18} />
           <span>Logout</span>
         </button>
