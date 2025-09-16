@@ -13,6 +13,7 @@ export const fetchProductById = async (id: string): Promise<Product> => {
   return data;
 };
 
+// --- THIS IS THE NEW FUNCTION ---
 export const fetchFeaturedProducts = () => {
   return axios.get<Product[]>(`${API_URL}/featured`);
 };

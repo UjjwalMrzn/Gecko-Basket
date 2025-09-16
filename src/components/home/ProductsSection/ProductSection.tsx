@@ -1,6 +1,6 @@
-// src/components/home/ProductsSection/ProductSection.tsx
-
-import useAllProducts from "../../../hooks/useAllProducts"; // Use the new, simple hook
+import { useState, useEffect } from 'react';
+import { Product } from '../../../types/products';
+import { fetchFeaturedProducts } from '../../../api/productsApi';
 import ProductCard from "../Product Card/ProductCard";
 import ProductCardSkeleton from "../Product Card/ProductCardSkeleton";
 import ErrorMessage from "../../ui/ErrorMessage";
@@ -8,10 +8,24 @@ import { Link } from "react-router-dom";
 import Button from "../../ui/Button";
 
 const ProductSection = () => {
-  const { products, loading, error } = useAllProducts();
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Show only the first 4 products as featured
-  const featuredProducts = products.slice(0, 4);
+  useEffect(() => {
+    const getFeaturedProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchFeaturedProducts(); // Call the correct API
+        setFeaturedProducts(response.data);
+      } catch (err) {
+        setError("Could not load Gecko's Picks. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    getFeaturedProducts();
+  }, []);
 
   return (
     <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white font-inter">
@@ -20,7 +34,7 @@ const ProductSection = () => {
           Featured Products
         </h2>
         <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-          Discover our handpicked selection of quality goods, from nourishing staples to unique merchandise.
+          Our handpicked selection of the best products, curated just for you.
         </p>
 
         {loading ? (
