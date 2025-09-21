@@ -1,11 +1,32 @@
-import { useAuth } from "../context/AuthContext";
-import { Navigate } from "react-router-dom";
+// src/AuthCheck/AuthCheck.tsx
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { useAuth } from '../context/AuthContext';
 
-const AuthCheck = ({ children }: { children: React.ReactNode }) => {
-  const { isLoggedIn } = useAuth();
+interface DecodedToken {
+  exp: number;
+}
 
-  if (!isLoggedIn) return <Navigate to="/login" replace />;
-  return <>{children}</>;
+const AuthCheck = () => {
+  const { token, logout } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (token) {
+      try {
+        const decodedToken: DecodedToken = jwtDecode(token);
+        if (decodedToken.exp * 1000 < Date.now()) {
+          logout();
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+        logout();
+      }
+    }
+  }, [location, token, logout]);
+
+  return null;
 };
 
 export default AuthCheck;

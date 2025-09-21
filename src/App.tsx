@@ -1,22 +1,23 @@
-import { BrowserRouter } from "react-router-dom";
-
+// src/App.tsx
+import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
-import { AuthProvider } from "./context/AuthContext";
 import { AuthModalProvider } from "./context/AuthModalContext";
-
+import { ToastProvider } from "./context/ToastContext";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
 import LoginModal from "./components/shared/AuthModal/LoginModal";
 import RegisterModal from "./components/shared/AuthModal/RegisterModal";
-import ScrollToTop from "./components/shared/ScrollToTop/ScrollToTop";
-import AppRoutes from "./routes/AppRoutes";
-import { ToastProvider } from "./context/ToastContext";
 import Toast from "./components/ui/Toast";
+import ScrollToTop from "./components/shared/ScrollToTop/ScrollToTop";
+import AuthCheck from "./AuthCheck/AuthCheck";
 
 const App = () => {
   return (
     <BrowserRouter>
       <ToastProvider>
         <AuthModalProvider>
+          {/* ✅ DEFINITIVE FIX: AuthProvider MUST wrap the contexts that depend on it. */}
           <AuthProvider>
             <CartProvider>
               <WishlistProvider>
@@ -25,6 +26,7 @@ const App = () => {
                 <RegisterModal />
                 <Toast />
                 <AppRoutes />
+                <AuthCheck />
               </WishlistProvider>
             </CartProvider>
           </AuthProvider>

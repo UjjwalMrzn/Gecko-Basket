@@ -1,60 +1,82 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+// src/context/WishlistContext.tsx
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { Product } from '../types/products';
 import { useToast } from './ToastContext';
+import { useAuth } from './AuthContext';
+import * as wishlistApi from '../api/wishlistApi';
+
+interface WishlistApiResponse { wishlist: Product[] }
 
 interface WishlistContextType {
   wishlist: Product[];
-  addToWishlist: (product: Product) => void;
-  removeFromWishlist: (productId: string) => void;
+  toggleWishlist: (product: Product) => Promise<void>;
   isInWishlist: (productId: string) => boolean;
+  loading: boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const { addToast } = useToast();
-  const [wishlist, setWishlist] = useState<Product[]>(() => {
-    try {
-      const localData = localStorage.getItem('gecko-wishlist');
-      if (!localData) return [];
-
-      const parsedData = JSON.parse(localData);
-      if (Array.isArray(parsedData)) {
-        // Ensure that the loaded items are valid products
-        return parsedData.filter(item => item && item._id);
-      }
-      return [];
-    } catch (error) {
-      console.error("Failed to parse wishlist from localStorage", error);
-      return [];
-    }
-  });
+  const { isLoggedIn, token, authIsLoading } = useAuth();
+  const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('gecko-wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
+    if (authIsLoading) return;
+
+    const syncWishlist = async () => {
+        setLoading(true);
+        if (isLoggedIn && token) {
+            try {
+                const res = await wishlistApi.getWishlist(token);
+                setWishlist((res.data as WishlistApiResponse).wishlist || []);
+            } catch (error) {
+                addToast("Could not sync your wishlist.", "error");
+            }
+        } else {
+            const localData = localStorage.getItem('gecko-wishlist');
+            setWishlist(localData ? JSON.parse(localData) : []);
+        }
+        setLoading(false);
+    };
+    syncWishlist();
+  }, [isLoggedIn, token, authIsLoading, addToast]);
 
   const isInWishlist = useCallback((productId: string): boolean => {
     return wishlist.some(p => p._id === productId);
   }, [wishlist]);
 
-  const removeFromWishlist = useCallback((productId: string) => {
-    const productName = wishlist.find(p => p._id === productId)?.name || 'Item';
-    setWishlist(prev => prev.filter(p => p._id !== productId));
-    addToast(`${productName} removed from wishlist`, 'info');
-  }, [addToast, wishlist]);
-
-  const addToWishlist = useCallback((product: Product) => {
-    if (isInWishlist(product._id)) {
-      removeFromWishlist(product._id);
+  const toggleWishlist = useCallback(async (product: Product) => {
+    const isCurrentlyInWishlist = isInWishlist(product._id);
+    
+    if (isLoggedIn && token) {
+        try {
+            const res = await wishlistApi.toggleWishlist(product._id, token);
+            setWishlist((res.data as WishlistApiResponse).wishlist || []);
+            addToast( isCurrentlyInWishlist ? `${product.name} removed from wishlist` : `${product.name} added to wishlist`, isCurrentlyInWishlist ? 'info' : 'success');
+        } catch (error) {
+            addToast("Failed to update wishlist.", "error");
+            throw new Error("Failed to toggle wishlist");
+        }
     } else {
-      setWishlist(prev => [...prev, product]);
-      addToast(`${product.name} added to wishlist`, 'success');
+        setWishlist(prev => {
+            const newWishlist = isCurrentlyInWishlist
+                ? prev.filter(p => p._id !== product._id)
+                : [...prev, product];
+            localStorage.setItem('gecko-wishlist', JSON.stringify(newWishlist));
+            return newWishlist;
+        });
+        addToast(isCurrentlyInWishlist ? `${product.name} removed from wishlist` : `${product.name} added to wishlist`, isCurrentlyInWishlist ? 'info' : 'success');
     }
-  }, [addToast, isInWishlist, removeFromWishlist]);
+  }, [isLoggedIn, token, addToast, isInWishlist]);
+
+  const contextValue = useMemo(() => ({
+    wishlist, toggleWishlist, isInWishlist, loading
+  }), [wishlist, loading, toggleWishlist, isInWishlist]);
 
   return (
-    <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist, isInWishlist }}>
+    <WishlistContext.Provider value={contextValue}>
       {children}
     </WishlistContext.Provider>
   );
@@ -62,8 +84,6 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
 
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
-  if (context === undefined) {
-    throw new Error('useWishlist must be used within a WishlistProvider');
-  }
+  if (!context) throw new Error('useWishlist must be used within a WishlistProvider');
   return context;
 };

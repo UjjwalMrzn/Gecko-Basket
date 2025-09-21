@@ -1,3 +1,4 @@
+// src/components/shared/Navbar/NavBar.tsx
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -8,6 +9,7 @@ import UserMenu from "../UserMenu/UserMenu";
 import SearchBar from "../SearchBar/SearchBar";
 import CategoriesDropDown from "../CategoriesDropDown/CategoriesDropDown";
 import { useAuth } from "../../../context/AuthContext";
+// ✅ DEFINITIVE FIX: Imports now point to the correct, new context files
 import { useCart, CartItem } from "../../../context/CartContext";
 import { useWishlist } from "../../../context/WishlistContext";
 
@@ -17,7 +19,8 @@ const Navbar = () => {
   const { wishlist } = useWishlist();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const categories = ["Groceries", "Electronics", "Health & Wellness"];
+  // This logic is from your old code and is correct.
+  const categories = ["Groceries", "Electronics", "Health & Wellness"]; 
   const totalCartQuantity = cartItems.reduce((total: number, item: CartItem) => total + item.quantity, 0);
 
   const navLinks = [
@@ -27,7 +30,7 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="w-full font-inter shadow-sm">
+    <header className="w-full font-inter shadow-sm" data-testid="navbar">
       <div className="bg-gradient-to-r from-[#59b143] to-[#b1d447] h-9 flex items-center justify-center px-4">
         <p className="text-white text-xs sm:text-sm text-center">
           50% off on your first purchase
@@ -35,22 +38,24 @@ const Navbar = () => {
       </div>
       <div className="bg-[#f0f2f3]">
         <div className="container mx-auto px-4 flex items-center justify-between h-[70px]">
-          <Link to="/">
+          <Link to="/" data-testid="navbar-logo-link">
             <img src={Logo} alt="Gecko Basket Logo" className="h-10 sm:h-12 w-auto" />
           </Link>
           <div className="hidden lg:flex flex-1 justify-center px-8">
-            <SearchBar onSubmit={(query: string) => console.log(query)} />
+            <SearchBar onSubmit={(query: string) => console.log(`Searching for: ${query}`)} />
           </div>
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="hidden sm:flex items-center gap-4">
               <WishlistIcon count={wishlist.length} />
               <CartIcon count={totalCartQuantity} />
             </div>
+            {/* ✅ DEFINITIVE FIX: This now uses your correct UserMenu component structure */}
             <UserMenu onLogout={logout} />
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden text-gray-700 hover:text-[#59b143]"
               aria-label="Open menu"
+              data-testid="mobile-menu-open-button"
             >
               <Menu size={24} />
             </button>
@@ -65,6 +70,7 @@ const Navbar = () => {
               key={to}
               to={to}
               className={({ isActive }) => `text-sm font-medium transition ${isActive ? "text-[#59b143]" : "text-gray-600 hover:text-[#59b143]"}`}
+              data-testid={`navbar-link-${label.toLowerCase()}`}
             >
               {label}
             </NavLink>
@@ -72,17 +78,17 @@ const Navbar = () => {
         </div>
       </nav>
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
+        <div className="fixed inset-0 z-50 flex lg:hidden" data-testid="mobile-menu">
           <div className="fixed inset-0 bg-black/40" onClick={() => setIsMobileMenuOpen(false)}></div>
           <div className="relative w-4/5 max-w-sm bg-white h-full shadow-xl">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="font-bold text-lg text-[#272343]">Menu</h2>
-              <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
+              <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu" data-testid="mobile-menu-close-button">
                 <X size={24} className="text-gray-600" />
               </button>
             </div>
             <div className="p-4 space-y-4">
-              <SearchBar onSubmit={(query: string) => console.log(query)} />
+              <SearchBar onSubmit={(query: string) => console.log(`Searching for: ${query}`)} />
               <nav className="flex flex-col gap-1">
                 {navLinks.map(({ to, label }) => (
                   <NavLink key={to} to={to} onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `block px-4 py-3 rounded-lg text-base font-medium ${isActive ? "bg-green-50 text-[#59b143]" : "text-gray-700 hover:bg-gray-100"}`}>

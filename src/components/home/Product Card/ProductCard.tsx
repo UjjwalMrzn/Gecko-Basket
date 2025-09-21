@@ -1,3 +1,5 @@
+// src/components/home/Product Card/ProductCard.tsx
+import { useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "../../ui/Button";
@@ -12,87 +14,72 @@ type Props = {
 
 const ProductCard = ({ product }: Props) => {
   const { addToCart } = useCart();
-  const { addToWishlist, isInWishlist } = useWishlist();
+  // ✅ DEFINITIVE FIX: Use the correctly named `toggleWishlist` function
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  
+  const [isCartLoading, setIsCartLoading] = useState(false);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
 
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsCartLoading(true);
+    await addToCart(product, 1);
+    setIsCartLoading(false);
+  };
+
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsWishlistLoading(true);
+    // ✅ DEFINITIVE FIX: Call the correct function
+    await toggleWishlist(product);
+    setIsWishlistLoading(false);
+  };
+  
   const isDiscounted = product.originalPrice != null && product.originalPrice > product.price;
-
-  let discountPercent = 0;
-  if (isDiscounted && product.originalPrice) {
-    discountPercent = Math.round(
-      ((product.originalPrice - product.price) / product.originalPrice) * 100
-    );
-  }
+  const discountPercent = isDiscounted && product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
 
   return (
-    <Link
-      to={`/product/${product._id}`}
-      className="group relative bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all flex flex-col overflow-hidden font-inter"
-      data-testid={`product-card-${product._id}`}
-    >
+    <div className="group relative bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all flex flex-col overflow-hidden font-inter" data-testid={`product-card-${product._id}`}>
+      <Link to={`/product/${product._id}`} className="absolute inset-0 z-0" aria-label={product.name} />
       <div className="relative bg-gray-50 aspect-[4/3] overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            addToWishlist(product);
-          }}
-          className="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition z-10"
-          title="Add to Wishlist"
-          data-testid={`product-card-wishlist-button-${product._id}`}
+        <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+        <Button
+          onClick={handleToggleWishlist}
+          disabled={isWishlistLoading}
+          className="absolute top-3 right-3 !p-2 h-auto rounded-full z-10"
+          variant="outline"
+          testId={`product-card-wishlist-button-${product._id}`}
         >
           <Heart size={18} className={`transition-colors ${isInWishlist(product._id) ? 'text-red-500 fill-red-500' : 'text-gray-700'}`} />
-        </button>
-        {product.tag && (
-          <span className="absolute top-3 left-3 bg-gradient-to-r from-[#59b143] to-[#9cd67d] text-white text-[11px] font-semibold px-2 py-1 rounded-full shadow-sm uppercase tracking-wide">
-            {product.tag}
-          </span>
-        )}
+        </Button>
+        {isDiscounted && <span className="absolute top-3 left-3 bg-red-500 text-white text-[11px] font-semibold px-2 py-1 rounded-full shadow-sm">-{discountPercent}%</span>}
       </div>
 
-      <div className="flex flex-col gap-2 p-4 flex-grow">
-        <h3 className="text-md font-semibold text-[#272343] truncate" title={product.name}>
-          {product.name}
-        </h3>
+      <div className="flex flex-col gap-2 p-4 flex-grow z-10 bg-white">
+        <h3 className="text-md font-semibold text-[#272343] truncate" title={product.name}>{product.name}</h3>
         <p className="text-xs text-gray-500 capitalize">{product.category}</p>
         <StarRating rating={product.rating} reviews={product.numReviews} />
-
-        <div className="flex items-center justify-between mt-2">
-          <div>
-            <span className="text-lg font-bold text-[#272343]">
-              Rs. {product.price}
-            </span>
-            {isDiscounted && (
-              <span className="ml-2 text-sm text-gray-400 line-through">
-                Rs. {product.originalPrice}
-              </span>
-            )}
-          </div>
-          {isDiscounted && (
-            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
-              -{discountPercent}%
-            </span>
-          )}
+        <div className="flex items-baseline justify-between mt-2">
+            <p className="text-lg font-bold text-[#272343]">Rs. {product.price.toLocaleString()}</p>
+            {isDiscounted && <p className="ml-2 text-sm text-gray-400 line-through">Rs. {product.originalPrice?.toLocaleString()}</p>}
         </div>
-
         <div className="mt-auto pt-3">
           <Button
-            onClick={(e) => {
-              e.preventDefault();
-              addToCart(product, 1);
-            }}
+            onClick={handleAddToCart}
             fullWidth
             icon={<ShoppingCart size={16} />}
+            disabled={isCartLoading}
             testId={`product-card-add-to-cart-button-${product._id}`}
           >
-            Add to Cart
+            {isCartLoading ? 'Adding...' : 'Add to Cart'}
           </Button>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
