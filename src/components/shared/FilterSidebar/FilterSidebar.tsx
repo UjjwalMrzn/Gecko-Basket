@@ -1,104 +1,165 @@
-// src/components/shared/FilterSidebar.tsx
-
+// src/components/shared/FilterSidebar/FilterSidebar.tsx
 import React from 'react';
-import { Product } from '../../../types/products';
-import { Star } from 'lucide-react';
+import { X } from 'lucide-react';
+import Button from '../../ui/Button';
+import StarRating from '../../ui/StarRating';
+import Input from '../../ui/Input'; // Import the Input component
 
-interface FilterSidebarProps {
-  products: Product[];
-  selectedBrands: string[];
-  onBrandChange: (brand: string) => void;
-  selectedPriceRange: string;
-  onPriceChange: (range: string) => void;
-  selectedRating: number;
-  onRatingChange: (rating: number) => void;
-  clearFilters: () => void;
+export interface Filters {
+  brands: string[];
+  minPrice: number;
+  maxPrice: number;
+  rating: number;
 }
 
-const priceRanges = [
-  { value: 'all', label: 'All Prices' },
-  { value: '0-1000', label: 'Under Rs. 1,000' },
-  { value: '1000-5000', label: 'Rs. 1,000 to Rs. 5,000' },
-  { value: '5000-10000', label: 'Rs. 5,000 to Rs. 10,000' },
-  { value: '10000+', label: 'Over Rs. 10,000' },
-];
-
-const ratingFilters = [
-  { value: 4, label: '4 Stars & Up' },
-  { value: 3, label: '3 Stars & Up' },
-  { value: 2, label: '2 Stars & Up' },
-  { value: 1, label: '1 Star & Up' },
-];
+interface FilterSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  filters: Filters;
+  setFilters: React.Dispatch<React.SetStateAction<Filters>>;
+  allBrands: string[];
+  applyFilters: () => void;
+  clearFilters: () => void;
+  maxPrice: number;
+}
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
-  products,
-  selectedBrands,
-  onBrandChange,
-  selectedPriceRange,
-  onPriceChange,
-  selectedRating,
-  onRatingChange,
-  clearFilters
+  isOpen,
+  onClose,
+  filters,
+  setFilters,
+  allBrands,
+  applyFilters,
+  clearFilters,
+  maxPrice,
 }) => {
-  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))];
+  const handleBrandChange = (brand: string) => {
+    const newBrands = filters.brands.includes(brand)
+      ? filters.brands.filter((b) => b !== brand)
+      : [...filters.brands, brand];
+    setFilters({ ...filters, brands: newBrands });
+  };
 
-  return (
-    <aside className="w-full md:w-72 flex-shrink-0" data-testid="filter-sidebar">
-      <div className="flex justify-between items-center mb-4">
+  // ✅ FIX: Handle changes for both min and max price inputs
+  const handlePriceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilters({ ...filters, [name]: value === '' ? 0 : parseInt(value, 10) });
+  };
+
+  const handleRatingChange = (newRating: number) => {
+    const rating = filters.rating === newRating ? 0 : newRating;
+    setFilters({ ...filters, rating });
+  };
+
+  const content = (
+    // ✅ FIX: Removed h-full and flex-col to fix the button gap
+    <div className="p-6 font-inter">
+      <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold text-[#272343]">Filters</h3>
-        <button 
-          onClick={clearFilters} 
-          className="text-xs font-semibold text-gray-500 hover:text-red-500 transition"
-          data-testid="clear-filters-button"
-        >
-          CLEAR ALL
+        <button onClick={onClose} className="lg:hidden" data-testid="close-filters-button">
+          <X size={24} />
         </button>
       </div>
 
+      {/* ✅ FIX: Replaced slider with professional min/max input fields */}
+      <div className="mb-6">
+        <h4 className="font-semibold mb-3 text-gray-800">Price</h4>
+        <div className="flex items-center gap-3">
+            <Input
+                label=""
+                name="minPrice"
+                type="number"
+                value={filters.minPrice === 0 ? '' : filters.minPrice}
+                onChange={handlePriceInputChange}
+                placeholder="Min"
+                testId="min-price-input"
+            />
+            <span className="text-gray-400">-</span>
+            <Input
+                label=""
+                name="maxPrice"
+                type="number"
+                value={filters.maxPrice === maxPrice ? '' : filters.maxPrice}
+                onChange={handlePriceInputChange}
+                placeholder="Max"
+                testId="max-price-input"
+            />
+        </div>
+      </div>
+
       {/* Brand Filter */}
-      <div className="border-t pt-4">
-        <h4 className="font-semibold text-gray-800 mb-3">Brand</h4>
+      <div className="mb-6 border-t pt-6">
+        <h4 className="font-semibold mb-3 text-gray-800">Brands</h4>
         <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-          {brands.map(brand => (
-            <label key={brand} className="flex items-center text-sm text-gray-700 cursor-pointer">
-              <input type="checkbox" checked={selectedBrands.includes(brand)} onChange={() => onBrandChange(brand)} className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
-              <span className="ml-2">{brand}</span>
+          {allBrands.map((brand) => (
+            <label key={brand} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.brands.includes(brand)}
+                onChange={() => handleBrandChange(brand)}
+                className="h-4 w-4 rounded border-gray-300 text-[#59b143] focus:ring-[#59b143]"
+                data-testid={`brand-checkbox-${brand}`}
+              />
+              <span className="text-sm text-gray-700">{brand}</span>
             </label>
           ))}
         </div>
       </div>
-      
-      {/* Price Filter */}
-      <div className="border-t pt-4 mt-6">
-        <h4 className="font-semibold text-gray-800 mb-3">Price Range</h4>
-        <div className="space-y-2">
-          {priceRanges.map(range => (
-            <label key={range.value} className="flex items-center text-sm text-gray-700 cursor-pointer">
-              <input type="radio" name="price-range" value={range.value} checked={selectedPriceRange === range.value} onChange={(e) => onPriceChange(e.target.value)} className="h-4 w-4 border-gray-300 text-green-600 focus:ring-green-500" />
-              <span className="ml-2">{range.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-      
+
       {/* Rating Filter */}
-      <div className="border-t pt-4 mt-6">
-        <h4 className="font-semibold text-gray-800 mb-3">Rating</h4>
-        <div className="space-y-2">
-          {ratingFilters.map(rating => (
-            <label key={rating.value} className="flex items-center text-sm text-gray-700 cursor-pointer">
-                <input type="radio" name="rating-filter" value={rating.value} checked={selectedRating === rating.value} onChange={() => onRatingChange(rating.value)} className="h-4 w-4 border-gray-300 text-green-600 focus:ring-green-500" />
-                <div className="ml-2 flex items-center">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} size={16} className={i < rating.value ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} />
-                    ))}
-                    <span className="ml-1.5 text-xs text-gray-500">& Up</span>
-                </div>
-            </label>
+      <div className="mb-6 border-t pt-6">
+        <h4 className="font-semibold mb-3 text-gray-800">Rating</h4>
+        <div className="flex flex-col items-start gap-1">
+          {[4, 3, 2, 1].map((r) => (
+            <button
+              key={r}
+              onClick={() => handleRatingChange(r)}
+              className={`p-1 rounded w-full text-left ${filters.rating === r ? 'bg-green-100' : ''}`}
+              data-testid={`rating-filter-${r}-star`}
+            >
+              <StarRating rating={r} isStatic />
+            </button>
           ))}
         </div>
       </div>
-    </aside>
+
+      {/* ✅ FIX: Buttons are now positioned correctly below the filters */}
+      <div className="pt-6 border-t">
+        <div className="flex flex-col gap-3">
+          <Button onClick={applyFilters} fullWidth data-testid="apply-filters-button">Apply Filters</Button>
+          <Button onClick={clearFilters} variant="outline" fullWidth data-testid="clear-filters-button">Clear Filters</Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile view (off-canvas) */}
+      <div
+        className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${
+          isOpen ? 'bg-black/40' : 'bg-transparent pointer-events-none'
+        }`}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50 transform transition-transform duration-300 lg:hidden ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        data-testid="filters-sidebar-mobile"
+      >
+        <div className="overflow-y-auto h-full">
+          {content}
+        </div>
+      </div>
+
+      {/* Desktop view (static) */}
+      <aside className="hidden lg:block w-72 flex-shrink-0" data-testid="filters-sidebar-desktop">
+        <div className="bg-white rounded-xl shadow-sm border h-full">
+            {content}
+        </div>
+      </aside>
+    </>
   );
 };
 

@@ -1,128 +1,148 @@
 // src/pages/Shop/Shop.tsx
-
-import { useState, useEffect } from "react";
-import axios from 'axios';
-import useProducts from "../../hooks/useProducts";
-import ProductCard from "../../components/home/Product Card/ProductCard";
-import ProductCardSkeleton from "../../components/home/Product Card/ProductCardSkeleton";
-import ErrorMessage from "../../components/ui/ErrorMessage";
-import { Category } from "../../types/category";
-import FilterSidebar from "../../components/shared/FilterSidebar/FilterSidebar";
-import CustomSelect from "../../components/ui/CustomSelect";
-import { ChevronDown } from "lucide-react";
-
-const sortOptions = [
-  { value: 'createdAt-desc', label: 'Newest Arrivals' },
-  { value: 'price-asc', label: 'Price: Low to High' },
-  { value: 'price-desc', label: 'Price: High to Low' },
-  { value: 'rating-desc', label: 'Top Rated' },
-];
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Filter } from 'lucide-react';
+import useAllProducts from '../../hooks/useAllProducts';
+import { Product } from '../../types/products';
+import ProductCard from '../../components/home/Product Card/ProductCard';
+import ProductCardSkeleton from '../../components/home/Product Card/ProductCardSkeleton';
+import ErrorMessage from '../../components/ui/ErrorMessage';
+import Button from '../../components/ui/Button';
+import FilterSidebar, { Filters } from '../../components/shared/FilterSidebar/FilterSidebar';
+import SortDropdown, { SortOption } from '../../components/ui/SortDropdown';
+import ActiveFilters from '../../components/ui/ActiveFilters'; // ✅ Import the new component
 
 const Shop = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedPriceRange, setSelectedPriceRange] = useState('all');
-  const [selectedRating, setSelectedRating] = useState(0);
-  const [sortOrder, setSortOrder] = useState(sortOptions[0]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { products, loading, error } = useAllProducts();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Use the single, powerful hook to get the products that match the current filters
-  const { products, loading: loadingProducts, error } = useProducts({
-    category: selectedCategory,
-    brands: selectedBrands,
-    priceRange: selectedPriceRange,
-    rating: selectedRating,
-    sort: sortOrder.value,
-  });
+  const [sortOrder, setSortOrder] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'latest');
+
+  const maxPriceFromProducts = useMemo(() => {
+    if (products.length === 0) return 50000;
+    return Math.ceil(Math.max(...products.map(p => p.price)) / 1000) * 1000;
+  }, [products]);
   
-  // Use the same hook, without filters, to get all products for the brand list
-  const { products: allProducts } = useProducts({});
+  const [filters, setFilters] = useState<Filters>({
+    brands: searchParams.getAll('brands') || [],
+    minPrice: 0,
+    maxPrice: parseInt(searchParams.get('maxPrice') || maxPriceFromProducts.toString(), 10),
+    rating: parseInt(searchParams.get('rating') || '0', 10),
+  });
 
   useEffect(() => {
-    const fetchCategories = async () => {
-        try {
-            const response = await axios.get<Category[]>('/api/categories');
-            setCategories(response.data);
-        } catch (err) {
-            console.error("Failed to fetch categories:", err);
-        }
-    };
-    fetchCategories();
-  }, []);
+    if(!searchParams.get('maxPrice')) {
+      setFilters(f => ({ ...f, maxPrice: maxPriceFromProducts }));
+    }
+  }, [maxPriceFromProducts, searchParams]);
 
-  const handleBrandChange = (brand: string) => {
-    setSelectedBrands(prev => 
-      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
-    );
+  const allBrands = useMemo(() => {
+    const brands = products.map((p) => p.brand);
+    return [...new Set(brands)].sort();
+  }, [products]);
+
+  const processedProducts = useMemo(() => {
+    let filtered = products.filter((p) => {
+      const brandMatch = filters.brands.length === 0 || filters.brands.includes(p.brand);
+      const priceMatch = p.price >= filters.minPrice && p.price <= filters.maxPrice;
+      const ratingMatch = p.rating === 0 || p.rating >= filters.rating;
+      return brandMatch && priceMatch && ratingMatch;
+    });
+
+    switch (sortOrder) {
+      case 'price-asc':
+        return filtered.sort((a, b) => a.price - b.price);
+      case 'price-desc':
+        return filtered.sort((a, b) => b.price - a.price);
+      case 'rating-desc':
+        return filtered.sort((a, b) => b.rating - a.rating);
+      case 'latest':
+      default:
+        return filtered;
+    }
+  }, [products, filters, sortOrder]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.brands.length > 0) filters.brands.forEach(b => params.append('brands', b));
+    if (filters.maxPrice < maxPriceFromProducts) params.set('maxPrice', filters.maxPrice.toString());
+    if (filters.rating > 0) params.set('rating', filters.rating.toString());
+    if (sortOrder !== 'latest') params.set('sort', sortOrder);
+    setSearchParams(params, { replace: true });
+  }, [filters, sortOrder, setSearchParams, maxPriceFromProducts]);
+
+  const handleClearFilter = (filterType: keyof Filters, value: any) => {
+    if (filterType === 'brands') {
+      setFilters(prev => ({...prev, brands: prev.brands.filter(b => b !== value)}));
+    } else {
+      const defaultValues = { maxPrice: maxPriceFromProducts, rating: 0 };
+      setFilters(prev => ({...prev, [filterType]: defaultValues[filterType as keyof typeof defaultValues]}));
+    }
   };
 
-  const clearFilters = () => {
-    setSelectedBrands([]);
-    setSelectedPriceRange('all');
-    setSelectedRating(0);
+  const clearAllFilters = () => {
+    setFilters({ brands: [], minPrice: 0, maxPrice: maxPriceFromProducts, rating: 0 });
+    setSortOrder('latest');
+    setIsFilterOpen(false);
   };
-
-  const renderSortTrigger = (value: { label: string }, isOpen: boolean) => (
-    <div className="w-48 flex items-center justify-between px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white">
-      <span className="text-gray-700">{value.label}</span>
-      <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-    </div>
-  );
-
-  const renderSortOption = (option: { label: string }, isSelected: boolean) => (
-    <div className={`px-4 py-2 text-sm cursor-pointer ${isSelected ? 'bg-green-100 text-green-800' : 'hover:bg-gray-50 text-gray-800'}`}>
-      {option.label}
-    </div>
-  );
 
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen font-inter">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
+    <section className="bg-gray-50 font-inter">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
           <FilterSidebar
-            products={allProducts}
-            selectedBrands={selectedBrands}
-            onBrandChange={handleBrandChange}
-            selectedPriceRange={selectedPriceRange}
-            onPriceChange={setSelectedPriceRange}
-            selectedRating={selectedRating}
-            onRatingChange={setSelectedRating}
-            clearFilters={clearFilters}
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            filters={filters}
+            setFilters={setFilters}
+            allBrands={allBrands}
+            applyFilters={() => setIsFilterOpen(false)}
+            clearFilters={clearAllFilters}
+            maxPrice={maxPriceFromProducts}
           />
 
           <main className="flex-1">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#272343]">
-                {selectedCategory || 'Shop All Products'}
-              </h2>
-              <CustomSelect
-                value={sortOrder}
-                options={sortOptions}
-                onChange={setSortOrder}
-                renderTrigger={(value, isOpen) => renderSortTrigger(value, isOpen)}
-                renderOption={renderSortOption}
-                testId="sort-by-select"
-              />
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-[#272343]">Shop Products</h1>
+                <p className="text-sm text-gray-600 mt-1" data-testid="product-count-display">
+                  Showing {processedProducts.length} results
+                </p>
+              </div>
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <SortDropdown currentSort={sortOrder} onSortChange={setSortOrder} />
+                <Button
+                  variant="outline"
+                  icon={<Filter size={16} />}
+                  className="lg:hidden"
+                  onClick={() => setIsFilterOpen(true)}
+                  data-testid="open-filters-button"
+                >
+                  Filter
+                </Button>
+              </div>
             </div>
             
-            {loadingProducts ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => ( <ProductCardSkeleton key={i} /> ))}
+            {/* ✅ NEW: Active Filters Display added here */}
+            <ActiveFilters filters={filters} onClear={handleClearFilter} onClearAll={clearAllFilters} />
+
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {Array.from({ length: 9 }).map((_, i) => <ProductCardSkeleton key={i} />)}
               </div>
             ) : error ? (
               <ErrorMessage message={error} />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.length > 0 ? (
-                  products.map((p) => ( <ProductCard key={p._id} product={p} /> ))
-                ) : (
-                  <div className="col-span-full text-center py-16">
-                    <p className="font-semibold text-lg text-gray-700">No Products Found</p>
-                    <p className="text-sm text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
-                  </div>
-                )}
+            ) : processedProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {processedProducts.map((p: Product) => <ProductCard key={p._id} product={p} />)}
               </div>
+            ) : (
+                <div className="text-center py-20 bg-white rounded-xl shadow-sm border">
+                    <h3 className="text-xl font-semibold text-gray-800">No Products Found</h3>
+                    <p className="text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
+                    <Button onClick={clearAllFilters} variant="outline" className="mt-6" data-testid="clear-filters-no-results-button">Clear All Filters</Button>
+                </div>
             )}
           </main>
         </div>
