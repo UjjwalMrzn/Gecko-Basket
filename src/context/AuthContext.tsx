@@ -1,5 +1,7 @@
 // src/context/AuthContext.tsx
+
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { User } from "../types/user";
 
 interface AuthContextType {
@@ -8,7 +10,8 @@ interface AuthContextType {
   token: string | null;
   authIsLoading: boolean;
   login: (user: User, token: string) => void;
-  logout: () => void;
+  logout: (options?: { fromAdmin?: boolean }) => void;
+  updateUserContext: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +20,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [authIsLoading, setAuthIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     try {
@@ -36,26 +40,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = useCallback((userData: User, tokenData: string) => {
     localStorage.setItem("gecko-user", JSON.stringify(userData));
     localStorage.setItem("gecko-token", tokenData);
+    setUser(userData);
+    setToken(tokenData);
 
+    // This is the critical fix. It now correctly checks the user's role
+    // and navigates to the correct page after the state is set.
     if (userData.role === 'admin') {
-      window.location.href = "/admin/dashboard";
+      navigate("/admin/dashboard");
     } else {
-      // ✅ DEFINITIVE FIX: A full page reload is a robust way to ensure all contexts re-sync
+      // For regular users, reloading the page is a robust way to ensure
+      // all components (like the navbar) update with the new login state.
       window.location.href = "/";
     }
-  }, []);
+  }, [navigate]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback((options?: { fromAdmin?: boolean }) => {
     localStorage.removeItem("gecko-user");
     localStorage.removeItem("gecko-token");
-    localStorage.removeItem("gecko-cart"); // Clear guest data too
-    localStorage.removeItem("gecko-wishlist");
-    // ✅ DEFINITIVE FIX: A full page reload ensures all state is cleared
-    window.location.href = "/auth";
+    setUser(null);
+    setToken(null);
+    if (options?.fromAdmin) {
+      navigate("/admin/login");
+    } else {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const updateUserContext = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem("gecko-user", JSON.stringify(updatedUser));
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn: !!user, user, token, authIsLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn: !!user,
+        user,
+        token,
+        authIsLoading,
+        login,
+        logout,
+        updateUserContext,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

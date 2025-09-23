@@ -1,17 +1,25 @@
-// src/api/wishlistApi.ts
-import axios from 'axios';
-import { Product } from '../types/products';
+import axios from "axios";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/wishlist`;
 
-export const getWishlist = (token: string) => {
-  return axios.get<{ wishlist: Product[] }>(API_URL, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-};
+/**
+ * Adds a product to the user's wishlist on the backend.
+ * @param {string} productId - The ID of the product to add.
+ * @param {string | null} token - The user's authentication token.
+ */
+export const addProductToWishlist = async (productId: string, token: string | null) => {
+  if (!token) {
+    throw new Error("You must be logged in to add items to your wishlist.");
+  }
 
-export const toggleWishlist = (productId: string, token: string) => {
-  return axios.post<{ wishlist: Product[] }>(API_URL, { productId }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.post(API_URL,
+    { productId },
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
 };
