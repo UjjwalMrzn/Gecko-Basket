@@ -1,5 +1,4 @@
 // src/pages/Account/AccountPage.tsx
-
 import { useState, FormEvent, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -12,16 +11,18 @@ import MyOrdersPage from "./MyOrderPage";
 import MyAddresses from "./MyAddresses";
 import MyReturnsPage from "./MyReturnsPage";
 import MyCancellationsPage from "./MyCancellationPage";
-import { updateUserProfile, changeUserPassword } from "../../api/userApi";
-import CustomSelect from "../../components/ui/CustomSelect";
+// ✅ Import the new API functions
+import { updateUserProfile, changeUserPassword } from "../../api/userApi"; 
+import CustomSelect, { SelectOption } from "../../components/ui/CustomSelect";
 
 type AccountTab = 'dashboard' | 'profile' | 'orders' | 'returns' | 'cancellations' | 'addresses' | 'security';
 
-const days = Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }));
-const months = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: new Date(0, i).toLocaleString('default', { month: 'long' }) }));
+// This data can be moved to a separate file later if needed
+const days: SelectOption[] = Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }));
+const months: SelectOption[] = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: new Date(0, i).toLocaleString('default', { month: 'long' }) }));
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 100 }, (_, i) => ({ value: String(currentYear - i), label: String(currentYear - i) }));
-const genderOptions = [
+const years: SelectOption[] = Array.from({ length: 100 }, (_, i) => ({ value: String(currentYear - i), label: String(currentYear - i) }));
+const genderOptions: SelectOption[] = [
   { value: 'male', label: 'Male' },
   { value: 'female', label: 'Female' },
   { value: 'other', label: 'Other' },
@@ -34,6 +35,7 @@ const AccountPage = () => {
   
   const [activeTab, setActiveTab] = useState<AccountTab>(searchParams.get('tab') as AccountTab || 'dashboard');
   
+  // State for forms
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', gender: user?.gender || '', day: '', month: '', year: '' });
   const [isProfileSubmitting, setIsProfileSubmitting] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
@@ -70,13 +72,21 @@ const AccountPage = () => {
     if (!token) return;
     setIsProfileSubmitting(true);
     try {
-      const birthday = profileForm.year && profileForm.month && profileForm.day ? new Date(`${profileForm.year}-${profileForm.month}-${profileForm.day}`).toISOString() : undefined;
+      // ✅ Connect to the backend API
+      const birthday = profileForm.year && profileForm.month && profileForm.day 
+        ? new Date(`${profileForm.year}-${profileForm.month}-${profileForm.day}`).toISOString() 
+        : undefined;
+      
       const updatedData = { name: profileForm.name, gender: profileForm.gender, birthday: birthday || undefined };
-      const updatedUser = await updateUserProfile(updatedData, token);
-      updateUserContext(updatedUser);
+
+      const response = await updateUserProfile(updatedData, token);
+
+      // ✅ Update the user context with the new user data from the server
+      updateUserContext(response.data);
       addToast("Profile updated successfully!", "success");
+
     } catch (error) {
-      addToast("Failed to update profile.", "error");
+      addToast("Failed to update profile. Please try again.", "error");
     } finally {
       setIsProfileSubmitting(false);
     }
@@ -91,9 +101,13 @@ const AccountPage = () => {
     if (!token) return;
     setIsPasswordSubmitting(true);
     try {
+      // ✅ Connect to the backend API
       await changeUserPassword({ oldPassword, newPassword }, token);
-      addToast("Password changed successfully.", "success");
-      setOldPassword(''); setNewPassword(''); setConfirmPassword('');
+      addToast("Password changed successfully!", "success");
+      // ✅ Clear the form fields on success
+      setOldPassword(''); 
+      setNewPassword(''); 
+      setConfirmPassword('');
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Failed to change password.";
       addToast(errorMessage, "error");
@@ -102,7 +116,7 @@ const AccountPage = () => {
     }
   };
 
-  if (!user) return <div>Loading user profile...</div>;
+  if (!user) return <div className="text-center py-20">Loading user profile...</div>;
 
   const TabButton = ({ tab, label, icon: Icon, testId }: { tab: AccountTab, label: string, icon: React.ElementType, testId: string }) => (
     <button onClick={() => handleTabClick(tab)} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all w-full text-left ${activeTab === tab ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100'}`} data-testid={testId} >
@@ -111,24 +125,24 @@ const AccountPage = () => {
     </button>
   );
 
-  const renderGenericTrigger = (value: { label: string }, placeholder: string, isOpen: boolean) => (
+  const renderGenericTrigger = (value: SelectOption | null, placeholder: string, isOpen: boolean) => (
     <div className={`w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-lg border transition ${isOpen ? 'ring-2 ring-green-500 border-green-500' : 'border-gray-300'}`}>
-      <span className={value.label ? 'text-gray-800' : 'text-gray-400'}>{value.label || placeholder}</span>
+      <span className={value?.label ? 'text-gray-800' : 'text-gray-400'}>{value?.label || placeholder}</span>
       <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
     </div>
   );
 
-  const renderGenericOption = (option: { label: string }, isSelected: boolean) => (
+  const renderGenericOption = (option: SelectOption, isSelected: boolean) => (
     <div className={`px-4 py-2 text-sm cursor-pointer ${isSelected ? 'bg-green-100 text-green-800' : 'hover:bg-gray-50 text-gray-800'}`}>
       {option.label}
     </div>
   );
 
   return (
-    <div className="bg-gray-50 min-h-[calc(100vh-300px)]">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <aside className="md:col-span-1">
+    <div className="bg-gray-50 min-h-[calc(100vh-300px)] font-inter">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <aside className="lg:col-span-1">
             <div className="bg-white p-4 rounded-xl shadow-sm border space-y-2 sticky top-24">
               <p className="px-4 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase">Manage My Account</p>
               <TabButton tab="dashboard" label="My Account" icon={UserCog} testId="account-dashboard-tab" />
@@ -141,7 +155,7 @@ const AccountPage = () => {
               <TabButton tab="cancellations" label="My Cancellations" icon={XCircle} testId="account-cancellations-tab" />
             </div>
           </aside>
-          <main className="md:col-span-3">
+          <main className="lg:col-span-3">
             <div className="bg-white p-6 sm:p-8 rounded-xl shadow-sm border">
               {activeTab === 'dashboard' && ( <ManageMyAccount /> )}
               {activeTab === 'profile' && (
@@ -154,14 +168,14 @@ const AccountPage = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Birthday</label>
                         <div className="flex gap-2">
-                          <CustomSelect value={days.find(d => d.value === profileForm.day) || { value: '', label: '' }} options={days} onChange={(option) => handleProfileChange('day', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Day', isOpen)} renderOption={renderGenericOption} testId="bday-day-select" />
-                           <CustomSelect value={months.find(m => m.value === profileForm.month) || { value: '', label: '' }} options={months} onChange={(option) => handleProfileChange('month', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Month', isOpen)} renderOption={renderGenericOption} testId="bday-month-select" />
-                           <CustomSelect value={years.find(y => y.value === profileForm.year) || { value: '', label: '' }} options={years} onChange={(option) => handleProfileChange('year', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Year', isOpen)} renderOption={renderGenericOption} testId="bday-year-select" />
+                           <CustomSelect value={days.find(d => d.value === profileForm.day) || null} options={days} onChange={(option) => handleProfileChange('day', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Day', isOpen)} renderOption={renderGenericOption} testId="bday-day-select" />
+                           <CustomSelect value={months.find(m => m.value === profileForm.month) || null} options={months} onChange={(option) => handleProfileChange('month', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Month', isOpen)} renderOption={renderGenericOption} testId="bday-month-select" />
+                           <CustomSelect value={years.find(y => y.value === profileForm.year) || null} options={years} onChange={(option) => handleProfileChange('year', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Year', isOpen)} renderOption={renderGenericOption} testId="bday-year-select" />
                         </div>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
-                        <CustomSelect value={genderOptions.find(g => g.value === profileForm.gender) || { value: '', label: '' }} options={genderOptions} onChange={(option) => handleProfileChange('gender', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Select Gender', isOpen)} renderOption={renderGenericOption} testId="gender-select" />
+                         <CustomSelect value={genderOptions.find(g => g.value === profileForm.gender) || null} options={genderOptions} onChange={(option) => handleProfileChange('gender', option.value)} renderTrigger={(value, isOpen) => renderGenericTrigger(value, 'Select Gender', isOpen)} renderOption={renderGenericOption} testId="gender-select" />
                       </div>
                     </div>
                     <div className="text-right pt-2">

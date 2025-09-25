@@ -1,65 +1,49 @@
+// src/components/home/ProductSection.tsx
 import { useState, useEffect } from 'react';
+// ✅ Corrected import to use the new function
+import { getFeaturedProducts } from '../../../api/productsApi';
 import { Product } from '../../../types/products';
-import { fetchFeaturedProducts } from '../../../api/productsApi';
-import ProductCard from "../Product Card/ProductCard";
-import ProductCardSkeleton from "../Product Card/ProductCardSkeleton";
-import ErrorMessage from "../../ui/ErrorMessage";
-import { Link } from "react-router-dom";
-import Button from "../../ui/Button";
+import ProductCard from '../Product Card/ProductCard'; // Assuming a shared ProductCard component exists
 
 const ProductSection = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getFeaturedProducts = async () => {
+    const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetchFeaturedProducts(); // Call the correct API
-        setFeaturedProducts(response.data);
+        const response = await getFeaturedProducts();
+        setProducts(response.data.data);
       } catch (err) {
-        setError("Could not load Gecko's Picks. Please try again later.");
+        setError('Failed to load featured products.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    getFeaturedProducts();
+
+    fetchProducts();
   }, []);
 
-  return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white font-inter">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center text-[#272343] mb-4">
-          Featured Products
-        </h2>
-        <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-          Our handpicked selection of the best products, curated just for you.
-        </p>
+  if (loading) {
+    return <div>Loading featured products...</div>;
+  }
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : error ? (
-          <ErrorMessage message={error} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        )}
-        
-        <div className="text-center mt-12">
-            <Link to="/shop">
-                <Button variant="outline">View All Products</Button>
-            </Link>
-        </div>
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Gecko's Picks</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <ProductCard key={product._id} product={product} />
+        ))}
       </div>
-    </section>
+    </div>
   );
 };
 

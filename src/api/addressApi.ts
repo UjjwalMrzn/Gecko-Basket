@@ -1,34 +1,36 @@
 // src/api/addressApi.ts
-
 import axios from 'axios';
-import { ShippingAddress } from '../types/address';
+import { Address } from '../types/address';
+
+type AddressPayload = Omit<Address, '_id'>;
 
 const API_URL = `${import.meta.env.VITE_API_URL}/users/addresses`;
 
-export const fetchUserAddresses = async (token: string): Promise<ShippingAddress[]> => {
-  const response = await axios.get<ShippingAddress[]>(API_URL, {
+// Gets all of a user's saved addresses
+export const getAddresses = (token: string) => {
+  // We expect the backend to return an array of Address objects
+  return axios.get<Address[]>(API_URL, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
 };
 
-export const createNewAddress = async (addressData: Omit<ShippingAddress, '_id' | 'isDefault'>, token: string): Promise<ShippingAddress> => {
-  const response = await axios.post<ShippingAddress>(API_URL, addressData, {
+// Adds a new address for a user
+export const addAddress = (addressData: AddressPayload, token: string) => {
+  return axios.post<Address>(API_URL, addressData, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
 };
 
-export const updateUserAddress = async (addressId: string, addressData: Partial<ShippingAddress>, token: string): Promise<ShippingAddress> => {
-  const response = await axios.put<ShippingAddress>(`${API_URL}/${addressId}`, addressData, {
+// Updates an existing address
+export const updateAddress = (id: string, addressData: Partial<AddressPayload>, token:string) => {
+  return axios.put<Address>(`${API_URL}/${id}`, addressData, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
 };
 
-export const deleteUserAddress = async (addressId: string, token: string): Promise<{ message: string }> => {
-  const response = await axios.delete<{ message: string }>(`${API_URL}/${addressId}`, {
+// Deletes an address
+export const deleteAddress = (id: string, token: string) => {
+  return axios.delete(`${API_URL}/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
 };

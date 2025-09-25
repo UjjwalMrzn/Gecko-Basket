@@ -1,31 +1,31 @@
 // src/hooks/useAllProducts.ts
+import { useState, useEffect } from 'react';
+// ✅ CORRECTED: Changed 'fetchAllProducts' to 'getProducts'
+import { getProducts } from '../api/productsApi';
+import { Product } from '../types/products';
 
-import { useState, useEffect } from "react";
-import { Product } from "../types/products";
-import { fetchAllProducts } from "../api/productsApi";
-
-const useAllProducts = () => {
+export const useAllProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getProducts = async () => {
+    const loadProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetchAllProducts();
-        setProducts(response.data);
+        // ✅ CORRECTED: Changed 'fetchAllProducts' to 'getProducts'
+        const response = await getProducts();
+        setProducts(response.data.data);
       } catch (err) {
-        setError("Failed to fetch products. Please try again later.");
+        setError('Failed to load products.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    getProducts();
+    loadProducts();
   }, []);
 
   return { products, loading, error };
 };
-
-export default useAllProducts;
